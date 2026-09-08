@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatial AI Companion - 主界面</title>
+    <link rel="stylesheet" href="main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="bg-animation">
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-blob blob-3"></div>
+    </div>
+
+    <!-- 顶部栏 -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="app-logo"><i class="fas fa-compass-drafting"></i></div>
+            <div>
+                <h1>Spatial AI Companion</h1>
+                <p><i class="fas fa-location-dot"></i> <span id="current-loc">北京·海淀区</span></p>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" title="天气" onclick="toggleWeatherModal()"><i class="fas fa-cloud-sun"></i></button>
+            <div class="user-avatar" id="user-avatar">U</div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="app-main">
+
+        <!-- ============ Tab 1: AI 对话 ============ -->
+        <section class="tab-content active" id="tab-chat">
+            <div class="chat-container">
+                <!-- 对话列表 -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- 欢迎消息 -->
+                    <div class="msg ai-msg">
+                        <div class="msg-avatar ai"><i class="fas fa-robot"></i></div>
+                        <div class="msg-bubble">
+                            <div class="msg-name">Spatial AI</div>
+                            <p>你好！我是你的空间智能伙伴 🌿 告诉我你想找什么样的地方，我会结合遥感环境数据为你推荐最适合的空间。</p>
+                            <div class="quick-suggests">
+                                <button class="suggest-chip" onclick="sendSuggest('想找一个安静、绿色、步行强度不高的地方')"><i class="fas fa-leaf"></i> 安静的绿地</button>
+                                <button class="suggest-chip" onclick="sendSuggest('附近有水边适合休闲的地方')"><i class="fas fa-water"></i> 水边休闲</button>
+                                <button class="suggest-chip" onclick="sendSuggest('想找适合半天轻徒步的地方')"><i class="fas fa-person-hiking"></i> 轻徒步</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 输入区 -->
+                <div class="chat-input-area">
+                    <button class="input-action" title="语音"><i class="fas fa-microphone"></i></button>
+                    <input type="text" id="chat-input" placeholder="描述你想去的地方..." onkeypress="if(event.key==='Enter')sendMessage()">
+                    <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ Tab 2: 地图探索 ============ -->
+        <section class="tab-content" id="tab-map">
+            <div class="map-full-container">
+                <div id="main-map"></div>
+                <!-- 地图浮动搜索框 -->
+                <div class="map-search-float">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" placeholder="搜索地点、公园、路线...">
+                    <button class="map-btn" title="回到我的位置" onclick="recenterMainMap()"><i class="fas fa-location-crosshairs"></i></button>
+                </div>
+                <!-- 图层切换 -->
+                <div class="map-layer-switch">
+                    <button class="layer-btn active" data-layer="gaode" onclick="switchLayer('gaode')"><i class="fas fa-map"></i> 标准</button>
+                    <button class="layer-btn" data-layer="satellite" onclick="switchLayer('satellite')"><i class="fas fa-satellite"></i> 卫星</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ Tab 3: 推荐 ============ -->
+        <section class="tab-content" id="tab-explore">
+            <div class="explore-container">
+                <!-- 推荐标题 -->
+                <div class="explore-header">
+                    <div>
+                        <h2><i class="fas fa-sparkles"></i> 为你推荐</h2>
+                        <p>基于你的画像与空间环境数据智能匹配</p>
+                    </div>
+                    <button class="refresh-btn" onclick="refreshRecommendations()" title="刷新推荐">
+                        <i class="fas fa-rotate"></i> 刷新
+                    </button>
+                </div>
+
+                <!-- 筛选条件 -->
+                <div class="filter-row">
+                    <div class="filter-scroll">
+                        <button class="filter-chip active" onclick="filterRecommend('all', this)">全部</button>
+                        <button class="filter-chip" onclick="filterRecommend('nature', this)"><i class="fas fa-tree"></i> 自然</button>
+                        <button class="filter-chip" onclick="filterRecommend('water', this)"><i class="fas fa-water"></i> 水边</button>
+                        <button class="filter-chip" onclick="filterRecommend('mountain', this)"><i class="fas fa-mountain"></i> 山地</button>
+                        <button class="filter-chip" onclick="filterRecommend('culture', this)"><i class="fas fa-landmark"></i> 人文</button>
+                        <button class="filter-chip" onclick="filterRecommend('relax', this)"><i class="fas fa-couch"></i> 休闲</button>
+                    </div>
+                </div>
+
+                <!-- 推荐卡片列表 -->
+                <div class="recommend-list" id="recommend-list">
+                    <!-- JS 动态填充 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ Tab 4: 我的 ============ -->
+        <section class="tab-content" id="tab-profile">
+            <div class="profile-page">
+                <!-- 用户卡片 -->
+                <div class="user-card">
+                    <div class="user-avatar-large" id="profile-avatar">U</div>
+                    <div class="user-info">
+                        <h2 id="profile-username">用户</h2>
+                        <p class="user-id" id="profile-id">SAC26001234</p>
+                    </div>
+                    <button class="edit-btn" onclick="openProfileEdit()"><i class="fas fa-pen"></i></button>
+                </div>
+
+                <!-- 统计数据 -->
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-num" id="stat-explored">12</div>
+                        <div class="stat-label">探索地点</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" id="stat-favorites">0</div>
+                        <div class="stat-label">收藏</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" id="stat-routes">3</div>
+                        <div class="stat-label">路线</div>
+                    </div>
+                </div>
+
+                <!-- 功能列表 -->
+                <div class="menu-list">
+                    <div class="menu-item" onclick="showToast('足迹功能开发中', 'info')">
+                        <i class="fas fa-shoe-prints menu-icon green"></i>
+                        <span>我的足迹</span>
+                        <i class="fas fa-chevron-right menu-arrow"></i>
+                    </div>
+                    <div class="menu-item" onclick="openFavorites()">
+                        <i class="fas fa-heart menu-icon pink"></i>
+                        <span>收藏夹</span>
+                        <i class="fas fa-chevron-right menu-arrow"></i>
+                    </div>
+                    <div class="menu-item" onclick="openPreferences()">
+                        <i class="fas fa-sliders menu-icon blue"></i>
+                        <span>偏好设置</span>
+                        <i class="fas fa-chevron-right menu-arrow"></i>
+                    </div>
+                    <div class="menu-item" onclick="openAbout()">
+                        <i class="fas fa-circle-info menu-icon purple"></i>
+                        <span>关于 Spatial AI</span>
+                        <i class="fas fa-chevron-right menu-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- 退出登录 -->
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-right-from-bracket"></i> 退出登录
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 底部导航栏 -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="chat" onclick="switchTab('chat', this)">
+            <i class="fas fa-comments"></i>
+            <span>对话</span>
+        </button>
+        <button class="nav-item" data-tab="map" onclick="switchTab('map', this)">
+            <i class="fas fa-map-location-dot"></i>
+            <span>地图</span>
+        </button>
+        <button class="nav-item center-btn" onclick="switchTab('explore', document.querySelector('.nav-item[data-tab=explore]'))">
+            <div class="center-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+        </button>
+        <button class="nav-item" data-tab="explore" onclick="switchTab('explore', this)">
+            <i class="fas fa-compass"></i>
+            <span>推荐</span>
+        </button>
+        <button class="nav-item" data-tab="profile" onclick="switchTab('profile', this)">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </button>
+    </nav>
+
+    <!-- 导航面板 -->
+    <div class="nav-panel" id="nav-panel">
+        <div class="nav-panel-handle" onclick="toggleNavPanel()">
+            <div class="nav-handle-bar"></div>
+        </div>
+        <div class="nav-panel-header">
+            <div class="nav-header-left">
+                <div class="nav-header-icon"><i class="fas fa-route"></i></div>
+                <div>
+                    <div class="nav-dst-label">前往</div>
+                    <div class="nav-dst-name" id="nav-dst-name">目的地</div>
+                </div>
+            </div>
+            <button class="nav-close-btn" onclick="closeNavPanel()" title="退出导航"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="nav-panel-summary">
+            <div class="nav-summary-item">
+                <div class="nav-summary-icon"><i class="fas fa-road"></i></div>
+                <div>
+                    <div class="nav-summary-value" id="nav-distance">0.0 km</div>
+                    <div class="nav-summary-label">总距离</div>
+                </div>
+            </div>
+            <div class="nav-summary-divider"></div>
+            <div class="nav-summary-item">
+                <div class="nav-summary-icon" style="background:rgba(251,191,36,0.2);color:#fbbf24"><i class="fas fa-clock"></i></div>
+                <div>
+                    <div class="nav-summary-value" id="nav-time">0 分钟</div>
+                    <div class="nav-summary-label">预计时间</div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-panel-body" id="nav-instructions"></div>
+    </div>
+
+    <!-- 行程弹窗 -->
+    <div class="iti-modal-overlay" id="itinerary-modal" onclick="if(event.target===this)toggleItinerary()">
+        <div class="iti-modal">
+            <button class="iti-close" onclick="toggleItinerary()"><i class="fas fa-times"></i></button>
+            <div class="iti-header">
+                <div class="iti-header-icon"><i class="fas fa-route"></i></div>
+                <div>
+                    <h3>为你规划的一日行程</h3>
+                    <p>共 <span id="itinerary-count">3</span> 个推荐地点</p>
+                </div>
+            </div>
+            <div class="iti-content" id="itinerary-steps"></div>
+            <button class="iti-export-btn" onclick="showToast('行程分享功能开发中','info')"><i class="fas fa-share-alt"></i> 分享行程</button>
+        </div>
+    </div>
+
+    <!-- 天气详情弹窗 -->
+    <div class="weather-modal-overlay" id="weather-modal" onclick="if(event.target===this)toggleWeatherModal()">
+        <div class="weather-modal">
+            <button class="weather-close" onclick="toggleWeatherModal()"><i class="fas fa-times"></i></button>
+            <div class="wm-hero">
+                <div class="wm-sun-rays"></div>
+                <i class="fas fa-cloud-sun wm-main-icon"></i>
+                <div class="wm-location"><i class="fas fa-location-dot"></i> 北京 · 海淀区</div>
+                <div class="wm-temp">26°</div>
+                <div class="wm-condition">晴间多云 · 体感 27°</div>
+            </div>
+            <div class="wm-details">
+                <div class="wm-detail-item">
+                    <i class="fas fa-droplet" style="color:#67e8f9;"></i>
+                    <div class="wm-detail-label">湿度</div>
+                    <div class="wm-detail-value">45%</div>
+                </div>
+                <div class="wm-detail-item">
+                    <i class="fas fa-wind" style="color:#a5a9ff;"></i>
+                    <div class="wm-detail-label">风力</div>
+                    <div class="wm-detail-value">3级</div>
+                </div>
+                <div class="wm-detail-item">
+                    <i class="fas fa-leaf" style="color:#6ee7b7;"></i>
+                    <div class="wm-detail-label">空气</div>
+                    <div class="wm-detail-value">优</div>
+                </div>
+                <div class="wm-detail-item">
+                    <i class="fas fa-sun" style="color:#fcd34d;"></i>
+                    <div class="wm-detail-label">紫外线</div>
+                    <div class="wm-detail-value">中等</div>
+                </div>
+            </div>
+            <div class="wm-section-title"><i class="fas fa-clock"></i> 逐时预报</div>
+            <div class="wm-hourly">
+                <div class="wm-hour active">
+                    <div class="wm-hour-time">现在</div>
+                    <i class="fas fa-sun"></i>
+                    <div class="wm-hour-temp">26°</div>
+                </div>
+                <div class="wm-hour">
+                    <div class="wm-hour-time">14时</div>
+                    <i class="fas fa-sun"></i>
+                    <div class="wm-hour-temp">27°</div>
+                </div>
+                <div class="wm-hour">
+                    <div class="wm-hour-time">15时</div>
+                    <i class="fas fa-cloud-sun"></i>
+                    <div class="wm-hour-temp">26°</div>
+                </div>
+                <div class="wm-hour">
+                    <div class="wm-hour-time">16时</div>
+                    <i class="fas fa-cloud"></i>
+                    <div class="wm-hour-temp">25°</div>
+                </div>
+                <div class="wm-hour">
+                    <div class="wm-hour-time">17时</div>
+                    <i class="fas fa-cloud-sun"></i>
+                    <div class="wm-hour-temp">24°</div>
+                </div>
+                <div class="wm-hour">
+                    <div class="wm-hour-time">18时</div>
+                    <i class="fas fa-cloud-moon"></i>
+                    <div class="wm-hour-temp">22°</div>
+                </div>
+            </div>
+            <div class="wm-tip">
+                <i class="fas fa-lightbulb"></i>
+                <span>天气晴好，适合户外活动。午后紫外线较强，建议做好防晒并及时补充水分。</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- 通用侧滑面板 -->
+    <div class="sp-panel-overlay" id="sp-panel" onclick="if(event.target===this)closeSidePanel()">
+        <div class="sp-panel">
+            <div class="sp-panel-header">
+                <div class="sp-panel-title" id="sp-title">面板</div>
+                <button class="sp-panel-close" onclick="closeSidePanel()"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="sp-panel-body" id="sp-body"></div>
+        </div>
+    </div>
+
+    <!-- 资料编辑弹窗 -->
+    <div class="sp-modal-overlay" id="edit-modal" onclick="if(event.target===this)document.getElementById('edit-modal').classList.remove('show')">
+        <div class="sp-modal">
+            <div class="sp-modal-header">
+                <h3>编辑个人资料</h3>
+                <button class="sp-panel-close" onclick="document.getElementById('edit-modal').classList.remove('show')"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="sp-modal-body">
+                <div class="edit-section">
+                    <label>头像</label>
+                    <div class="avatar-picker" id="avatar-picker"></div>
+                </div>
+                <div class="edit-section">
+                    <label>昵称</label>
+                    <input type="text" class="sp-input" id="edit-username" maxlength="16" placeholder="请输入昵称">
+                </div>
+            </div>
+            <div class="sp-modal-footer">
+                <button class="sp-btn-secondary" onclick="document.getElementById('edit-modal').classList.remove('show')">取消</button>
+                <button class="sp-btn-primary" onclick="saveProfileEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="beijing_places.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

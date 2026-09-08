@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatial AI Companion - 欢迎入驻</title>
+    <link rel="stylesheet" href="welcome.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet 地图 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="bg-animation">
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-blob blob-3"></div>
+        <div class="bg-stars"></div>
+    </div>
+
+    <!-- ============ Step 1: 欢迎页 ============ -->
+    <section class="onboard-screen active" id="screen-welcome">
+        <div class="welcome-content">
+            <!-- 可爱吉祥物 -->
+            <div class="mascot">
+                <div class="mascot-orb">
+                    <i class="fas fa-compass-drafting"></i>
+                    <div class="mascot-eye left"></div>
+                    <div class="mascot-eye right"></div>
+                    <div class="mascot-mouth"></div>
+                </div>
+                <div class="mascot-shadow"></div>
+            </div>
+
+            <h1 class="welcome-title">欢迎来到 <span class="gradient-text">Spatial AI Companion</span></h1>
+            <p class="welcome-subtitle">你的空间智能伙伴，让 AI 理解"什么空间适合此刻的你"</p>
+
+            <!-- 特色卡片 -->
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <div class="feature-icon icon-satellite">
+                        <i class="fas fa-satellite"></i>
+                    </div>
+                    <h3>遥感环境感知</h3>
+                    <p>融合 DEM、植被、水体等客观数据，理解空间本质</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-mountain">
+                        <i class="fas fa-mountain-sun"></i>
+                    </div>
+                    <h3>多地理场景</h3>
+                    <p>城市、山地、湿地、海岸，全地形智能适配</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-brain">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>个性化推荐</h3>
+                    <p>根据你的兴趣、体力、心情，匹配最适合的空间</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-route">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3>可解释推荐</h3>
+                    <p>不只推荐"去哪"，还告诉你"为什么"和"注意什么"</p>
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="goToScreen('profile')">
+                <span>开始探索</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <p class="user-greeting" id="user-greeting"></p>
+        </div>
+    </section>
+
+    <!-- ============ Step 2: 个人信息 ============ -->
+    <section class="onboard-screen" id="screen-profile">
+        <div class="profile-content">
+            <button class="back-btn" onclick="goToScreen('welcome')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="step-badge">第 1 步 / 共 2 步</div>
+            <h2 class="screen-title">让我们先了解一下你 <span class="emoji">😊</span></h2>
+            <p class="screen-desc">这些信息将帮助我们为你推荐更合适的空间</p>
+
+            <!-- 性别选择 -->
+            <div class="form-section">
+                <label class="section-label">
+                    <i class="fas fa-venus-mars"></i> 你的性别
+                </label>
+                <div class="gender-options">
+                    <label class="gender-card">
+                        <input type="radio" name="gender" value="male">
+                        <div class="gender-card-inner">
+                            <div class="gender-icon boy"><i class="fas fa-mars"></i></div>
+                            <span>男生</span>
+                        </div>
+                    </label>
+                    <label class="gender-card">
+                        <input type="radio" name="gender" value="female">
+                        <div class="gender-card-inner">
+                            <div class="gender-icon girl"><i class="fas fa-venus"></i></div>
+                            <span>女生</span>
+                        </div>
+                    </label>
+                    <label class="gender-card">
+                        <input type="radio" name="gender" value="other">
+                        <div class="gender-card-inner">
+                            <div class="gender-icon other"><i class="fas fa-genderless"></i></div>
+                            <span>其他</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 年龄选择 -->
+            <div class="form-section">
+                <label class="section-label">
+                    <i class="fas fa-cake-candles"></i> 你的年龄
+                    <span class="age-display" id="age-display">20 岁</span>
+                </label>
+                <div class="age-slider-wrap">
+                    <input type="range" min="10" max="80" value="20" id="age-slider" class="age-slider">
+                    <div class="age-marks">
+                        <span>10</span><span>25</span><span>40</span><span>55</span><span>80</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 活动偏好 -->
+            <div class="form-section">
+                <label class="section-label">
+                    <i class="fas fa-person-hiking"></i> 你喜欢的活动（可多选）
+                </label>
+                <div class="activity-chips">
+                    <label class="chip">
+                        <input type="checkbox" value="hiking">
+                        <span><i class="fas fa-person-hiking"></i> 徒步</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="relax">
+                        <span><i class="fas fa-couch"></i> 休闲</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="photo">
+                        <span><i class="fas fa-camera"></i> 摄影</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="water">
+                        <span><i class="fas fa-water"></i> 水边</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="culture">
+                        <span><i class="fas fa-landmark"></i> 人文</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="nature">
+                        <span><i class="fas fa-tree"></i> 自然</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="running">
+                        <span><i class="fas fa-person-running"></i> 跑步</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="biking">
+                        <span><i class="fas fa-person-biking"></i> 骑行</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="mountain">
+                        <span><i class="fas fa-mountain-sun"></i> 爬山</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="family">
+                        <span><i class="fas fa-people-roof"></i> 亲子</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="quiet">
+                        <span><i class="fas fa-moon"></i> 安静</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="explore">
+                        <span><i class="fas fa-compass"></i> 探索</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="food">
+                        <span><i class="fas fa-utensils"></i> 美食</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="shopping">
+                        <span><i class="fas fa-bag-shopping"></i> 逛街</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="night">
+                        <span><i class="fas fa-moon-stars"></i> 夜景</span>
+                    </label>
+                    <label class="chip">
+                        <input type="checkbox" value="art">
+                        <span><i class="fas fa-palette"></i> 艺术</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="goToScreen('location')">
+                <span>下一步</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- ============ Step 3: 位置授权 ============ -->
+    <section class="onboard-screen" id="screen-location">
+        <div class="location-content">
+            <button class="back-btn" onclick="goToScreen('profile')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="step-badge">第 2 步 / 共 2 步</div>
+
+            <div class="location-illustration">
+                <div class="location-pin-bounce">
+                    <i class="fas fa-location-dot"></i>
+                    <div class="pin-ring"></div>
+                    <div class="pin-ring delay"></div>
+                </div>
+            </div>
+            <h2 class="screen-title">你在哪里呢？ <span class="emoji">📍</span></h2>
+            <p class="screen-desc">授权位置后，我们可以在地图上为你展示附近的空间<br>并推荐适合你的地点和路线</p>
+
+            <div class="location-actions">
+                <button class="primary-btn" onclick="authorizeLocation()">
+                    <i class="fas fa-location-crosshairs"></i>
+                    <span>授权我的位置</span>
+                </button>
+                <button class="text-btn" onclick="useDefaultLocation()">
+                    <span>使用默认位置（北京·海淀区）</span>
+                </button>
+            </div>
+
+            <div class="privacy-note">
+                <i class="fas fa-shield-halved"></i>
+                <span>你的位置信息仅用于本地推荐，不会上传服务器</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ Step 4: 地图探索 ============ -->
+    <section class="onboard-screen" id="screen-map">
+        <!-- 顶部栏 -->
+        <header class="map-header">
+            <div class="map-header-left">
+                <div class="map-logo">
+                    <i class="fas fa-compass-drafting"></i>
+                </div>
+                <div>
+                    <h3>Spatial AI Companion</h3>
+                    <p id="map-location-label">北京·海淀区</p>
+                </div>
+            </div>
+            <div class="map-header-right">
+                <button class="map-icon-btn" onclick="recenterMap()" title="回到中心">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button class="map-icon-btn" onclick="toggleList()" title="地点列表">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <div class="user-avatar" id="map-user-avatar">U</div>
+            </div>
+        </header>
+
+        <!-- 地图主体 -->
+        <div class="map-body">
+            <!-- 地图容器 -->
+            <div id="leaflet-map"></div>
+
+            <!-- 地点列表面板 -->
+            <aside class="place-panel" id="place-panel">
+                <div class="place-panel-header">
+                    <h3><i class="fas fa-location-dot"></i> 附近地点</h3>
+                    <button class="close-panel" onclick="toggleList()">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="place-list" id="place-list">
+                    <!-- JS 动态填充 -->
+                </div>
+            </aside>
+
+            <!-- 底部信息条 -->
+            <div class="map-footer">
+                <div class="weather-card">
+                    <div class="weather-icon-wrap">
+                        <i class="fas fa-sun weather-icon"></i>
+                        <div class="weather-rays"></div>
+                    </div>
+                    <div class="weather-info">
+                        <div class="weather-temp">26°<span>C</span></div>
+                        <div class="weather-desc">晴 · 北京海淀区</div>
+                        <div class="weather-extra">
+                            <span><i class="fas fa-droplet"></i> 45%</span>
+                            <span><i class="fas fa-wind"></i> 3级</span>
+                            <span><i class="fas fa-eye"></i> 优</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="start-explore-btn" onclick="finishOnboarding()">
+                    <span>完成引导，开始探索</span>
+                    <i class="fas fa-rocket"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="welcome.js"></script>
+</body>
+</html>
