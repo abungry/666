@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>温度是怎样"诞生"的？｜热力学第零定律 · 开放探究</title>
+<style>
+/* ================= 基础与变量 ================= */
+:root{
+  --indigo:#6366f1; --indigo-l:#a5b4fc; --cyan:#06b6d4; --cyan-l:#67e8f9;
+  --green:#10b981; --green-l:#6ee7b7; --pink:#ec4899; --amber:#f59e0b; --red:#ef4444;
+  --ink:#e9edff; --ink-dim:#aab4dc; --ink-faint:#7a84ad;
+  --glass:rgba(255,255,255,.055); --glass-2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.13);
+  --serif:"Times New Roman","STIXTwoText","Cambria Math",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  color:var(--ink); background:#070b18; line-height:1.75; overflow-x:hidden;
+}
+.math{font-family:var(--serif); font-style:italic; letter-spacing:.02em}
+::selection{background:rgba(99,102,241,.45)}
+
+/* ================= 动态背景 ================= */
+.bg{position:fixed; inset:0; z-index:-2;
+  background:
+    radial-gradient(1200px 800px at 80% -10%, #1b2350 0%, transparent 60%),
+    radial-gradient(1000px 700px at -10% 30%, #10243a 0%, transparent 55%),
+    linear-gradient(180deg,#070b18 0%,#0b1026 45%,#0a1530 100%);}
+.orb{position:fixed; border-radius:50%; filter:blur(70px); opacity:.30; z-index:-1;
+  animation:float 18s ease-in-out infinite alternate}
+.orb.o1{width:420px;height:420px;left:-120px;top:8%;background:#6366f1}
+.orb.o2{width:360px;height:360px;right:-100px;top:42%;background:#06b6d4;animation-delay:-6s}
+.orb.o3{width:300px;height:300px;left:30%;bottom:-120px;background:#10b981;animation-delay:-12s;opacity:.22}
+@keyframes float{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,-50px) scale(1.15)}}
+
+/* ================= 顶部导航与进度 ================= */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:100;
+  background:linear-gradient(90deg,var(--indigo),var(--cyan),var(--green));
+  box-shadow:0 0 12px rgba(103,232,249,.8)}
+nav{position:fixed;top:0;left:0;right:0;z-index:90;
+  background:linear-gradient(180deg,rgba(10,14,32,.72),rgba(10,14,32,.35) 70%,transparent);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;
+  border-image:linear-gradient(90deg,transparent,rgba(165,180,252,.5),transparent) 1;
+}
+.nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:10px 22px}
+.nav-logo{font-weight:700;font-size:14px;letter-spacing:.05em;white-space:nowrap;
+  background:linear-gradient(90deg,var(--indigo-l),var(--cyan-l));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{color:var(--ink-dim);text-decoration:none;font-size:12.5px;padding:5px 10px;border-radius:99px;transition:.25s;white-space:nowrap}
+.nav-links a:hover{color:var(--ink);background:var(--glass-2)}
+
+/* ================= 版式容器 ================= */
+main{max-width:1080px;margin:0 auto;padding:0 24px}
+section{padding:84px 0 30px;scroll-margin-top:70px}
+.sec-tag{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.22em;color:var(--cyan-l);font-weight:600;margin-bottom:14px}
+.sec-tag::before{content:"";width:34px;height:2px;background:linear-gradient(90deg,var(--cyan),transparent)}
+h2.title{font-size:clamp(26px,3.6vw,38px);line-height:1.3;font-weight:800;margin-bottom:14px}
+.grad-text{background:linear-gradient(92deg,#c7d2fe 0%,#67e8f9 45%,#6ee7b7 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--ink-dim);font-size:16.5px;max-width:820px;margin-bottom:30px}
+p.body{color:var(--ink-dim);margin:12px 0}
+p.body b, p.body strong{color:var(--ink);font-weight:600}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:22px;
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* ================= 按钮 / 徽章 ================= */
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--line);
+  color:var(--ink);background:var(--glass-2);border-radius:99px;padding:9px 20px;font-size:14px;
+  font-family:inherit;transition:.25s;user-select:none}
+.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:linear-gradient(90deg,var(--indigo),#38bdf8);border:none;font-weight:600;
+  box-shadow:0 8px 26px rgba(99,102,241,.45)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.chip{display:inline-block;font-size:12px;padding:3px 12px;border-radius:99px;border:1px solid var(--line);
+  color:var(--ink-dim);background:rgba(255,255,255,.04);margin:3px 4px}
+.chip.ok{color:var(--green-l);border-color:rgba(110,231,183,.4);background:rgba(16,185,129,.1)}
+.chip.no{color:#fca5a5;border-color:rgba(252,165,165,.4);background:rgba(239,68,68,.1)}
+.chip.warn{color:#fcd34d;border-color:rgba(252,211,77,.4);background:rgba(245,158,11,.1)}
+
+/* ================= Hero ================= */
+header.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;padding:120px 24px 60px;position:relative}
+.hero .kicker{font-size:13px;letter-spacing:.35em;color:var(--cyan-l);margin-bottom:26px;font-weight:600}
+.hero h1{font-size:clamp(34px,6vw,66px);line-height:1.18;font-weight:800;max-width:900px}
+.hero .sub{margin-top:22px;color:var(--ink-dim);font-size:clamp(15px,2vw,19px);max-width:720px}
+.hero .core-q{margin-top:40px;max-width:780px;padding:26px 32px;border-radius:24px;position:relative}
+.hero .core-q::before{content:"";position:absolute;inset:-1px;border-radius:24px;padding:1px;
+  background:linear-gradient(120deg,var(--indigo),var(--cyan),var(--green));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.7}
+.hero .core-q .lab{font-size:12.5px;letter-spacing:.2em;color:var(--green-l);margin-bottom:10px}
+.route{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:34px}
+.route .chip{font-size:13px;padding:7px 16px}
+.hero .meta{margin-top:44px;font-size:13.5px;color:var(--ink-faint)}
+.hero .meta [contenteditable]{border-bottom:1px dashed var(--ink-faint);min-width:110px;display:inline-block;
+  outline:none;color:var(--ink-dim);padding:0 6px}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--ink-faint);font-size:12px;
+  animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ================= 通用卡片排版 ================= */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{padding:26px 28px}
+.card h3{font-size:18px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.card .idx{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--cyan-l);
+  border:1px solid rgba(103,232,249,.4);border-radius:8px;padding:1px 9px}
+.note{border-left:3px solid var(--cyan);padding:14px 18px;margin:20px 0;border-radius:0 14px 14px 0;
+  background:rgba(6,182,212,.07);color:var(--ink-dim);font-size:14.5px}
+.note.warn{border-color:var(--amber);background:rgba(245,158,11,.08)}
+.note.key{border-color:var(--green);background:rgba(16,185,129,.08)}
+.note b{color:var(--ink)}
+.formula{font-family:var(--serif);font-size:19px;text-align:center;padding:16px;margin:16px 0;
+  background:rgba(0,0,0,.25);border:1px dashed var(--line);border-radius:14px;letter-spacing:.03em}
+.formula small{font-family:inherit;font-size:.72em;color:var(--ink-faint)}
+
+/* ============ S1 模拟器 ============ */
+.sim-wrap{padding:22px 22px 18px;margin-top:10px}
+.sim-readouts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:52px;margin-bottom:10px}
+.rd{text-align:center}
+.rd .nm{font-size:13px;color:var(--ink-dim);margin-bottom:6px}
+.rd .bar{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.rd .fill{height:100%;width:20%;border-radius:99px;transition:width .15s linear;
+  background:linear-gradient(90deg,var(--indigo),var(--cyan),var(--amber),var(--red))}
+.rd .val{font-family:var(--serif);font-size:22px;margin-top:5px;color:var(--ink)}
+canvas#simC{width:100%;display:block;border-radius:16px;background:rgba(4,8,20,.6);border:1px solid var(--line);cursor:pointer}
+.sim-gates{display:flex;justify-content:center;gap:14px;margin:12px 0 4px;flex-wrap:wrap}
+.sim-status{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.ss{padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13.5px;color:var(--ink-dim)}
+.ss b{color:var(--ink)}
+#simCallout{display:none;margin-top:14px}
+
+/* ============ S2 三性检验 ============ */
+.props{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:8px}
+.prop{padding:22px;display:flex;flex-direction:column}
+.prop .svp{margin:10px 0 14px;min-height:120px;display:flex;align-items:center;justify-content:center}
+.prop svg{overflow:visible}
+.prop .vstep{font-size:13.5px;color:var(--ink-dim);min-height:44px;margin-bottom:10px}
+.prop .verdict{display:none;margin-top:10px;padding:10px 14px;border-radius:12px;font-size:13.5px}
+.prop .verdict.ok{background:rgba(16,185,129,.1);border:1px solid rgba(110,231,183,.35);color:var(--green-l)}
+.prop .verdict.warn{display:block;background:rgba(245,158,11,.1);border:1px solid rgba(252,211,77,.35);color:#fcd34d}
+.prop .verdict.bad{display:block;background:rgba(239,68,68,.1);border:1px solid rgba(252,165,165,.35);color:#fca5a5}
+.prop .btn{align-self:flex-start;margin-top:auto}
+.hid{opacity:0;transition:opacity .5s}
+.hid.on{opacity:1}
+.hid2{display:none}
+
+/* ============ S3 等价类舞台 ============ */
+.stage-wrap{padding:20px;position:relative}
+.stage{position:relative;width:100%;aspect-ratio:960/380;border-radius:16px;overflow:hidden;
+  background:radial-gradient(700px 300px at 50% 40%,rgba(99,102,241,.12),transparent 70%),rgba(4,8,20,.55);
+  border:1px solid var(--line)}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.sc{position:absolute;width:70px;height:70px;margin-left:-35px;margin-top:-35px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:19px;font-weight:700;
+  background:rgba(20,28,58,.92);border:1.5px solid var(--line);color:var(--ink);z-index:2;
+  box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.sc .sys{position:absolute;top:5px;left:8px;font-size:10px;font-family:inherit;font-style:normal;color:var(--ink-faint)}
+.bubble{position:absolute;width:252px;height:252px;margin-left:-126px;margin-top:-126px;border-radius:50%;
+  z-index:1;opacity:0;transform:scale(.4);transition:opacity .7s .2s, transform .7s .2s cubic-bezier(.2,1.4,.4,1);
+  display:flex;align-items:flex-start;justify-content:center;padding-top:12px}
+.bubble.on{opacity:.16;transform:scale(1)}
+.bubble .blab{opacity:0;transition:opacity .5s .7s;font-family:var(--serif);font-size:30px;font-weight:700;font-style:italic}
+.bubble.on .blab{opacity:1}
+#eqCtl{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;align-items:center}
+#eqCtl .hint{font-size:13px;color:var(--ink-faint)}
+#eqCallout{display:none;margin-top:14px}
+
+/* ============ S4 温标实验室 ============ */
+.lab-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:start}
+@media(max-width:820px){.lab-grid{grid-template-columns:1fr}}
+.fpicked{outline:2px solid var(--cyan);outline-offset:2px}
+#fStatus .chip{margin:4px 0;display:block;font-size:13.5px;padding:8px 14px}
+#fVerdict{margin-top:12px;padding:12px 16px;border-radius:12px;font-size:14px;display:none}
+
+/* ============ S5 循环论证 ============ */
+.circ-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:820px){.circ-grid{grid-template-columns:1fr}}
+.circ-box{padding:20px;min-height:380px;display:flex;flex-direction:column}
+.circ-box svg{width:100%;max-width:420px;margin:0 auto}
+.audit-list .ai{padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+  margin-bottom:10px;font-size:14px;color:var(--ink-dim);opacity:.45;transition:.4s}
+.audit-list .ai b{color:var(--ink)}
+.audit-list .ai.lit{opacity:1;border-color:rgba(252,165,165,.45);background:rgba(239,68,68,.08)}
+.audit-list .ai.lit b{color:#fca5a5}
+.chain{display:none;flex-direction:column;gap:0;margin-top:6px}
+.chain.on{display:flex}
+.cstep{display:flex;gap:14px;align-items:flex-start;opacity:0;transform:translateY(14px);transition:.5s}
+.chain.on .cstep{opacity:1;transform:none}
+.cstep .n{flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--cyan));color:#fff;font-size:14px}
+.cstep .cline{width:2px;align-self:stretch;margin-left:14px;background:linear-gradient(var(--cyan),var(--green));min-height:18px}
+.cstep:last-child .cline{display:none}
+.cstep .ctxt{padding-bottom:16px;font-size:14.5px;color:var(--ink-dim)}
+.cstep .ctxt b{color:var(--ink)}
+.tri-node{cursor:pointer}
+
+/* ============ S6 时间线与温度计 ============ */
+.tl{position:relative;margin:26px 0 10px;padding-left:34px}
+.tl::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(var(--indigo),var(--cyan),var(--green))}
+.tl-item{position:relative;margin-bottom:22px;padding:22px 26px}
+.tl-item::before{content:"";position:absolute;left:-30px;top:28px;width:14px;height:14px;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 0 5px rgba(6,182,212,.18)}
+.tl-item h3{font-size:17.5px;margin-bottom:8px}
+.tl-item .era{font-size:12px;letter-spacing:.18em;color:var(--cyan-l)}
+.thermo{padding:24px;display:grid;grid-template-columns:1.1fr 1.4fr;gap:24px;align-items:center}
+@media(max-width:760px){.thermo{grid-template-columns:1fr}}
+.tube-row{display:flex;gap:20px;justify-content:center;align-items:flex-end;height:230px}
+.tube{width:44px;height:200px;border-radius:22px;border:2px solid var(--line);position:relative;overflow:hidden;background:rgba(0,0,0,.25)}
+.tube .liq{position:absolute;bottom:0;left:0;right:0;transition:height .25s;border-radius:0 0 20px 20px}
+.tube .tlab{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-size:12px;white-space:nowrap;color:var(--ink-dim)}
+.tube .tval{position:absolute;top:-48px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:16px;white-space:nowrap}
+.tube.fix::after,.tube.fix::before{content:"";position:absolute;left:-6px;right:-6px;height:2px;background:var(--green-l);opacity:.7}
+.tube.fix::after{top:calc(100% - 2px)}
+.tube.fix::before{top:2px}
+input[type=range]{width:100%;accent-color:var(--cyan);height:28px}
+.thermo-note{font-size:13.5px;color:var(--ink-faint);margin-top:8px}
+
+/* ============ S7 总结 ============ */
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.yn{grid-template-columns:1fr}}
+.yn .card{padding:26px 28px}
+.yn h3{display:flex;align-items:center;gap:10px;font-size:19px;margin-bottom:14px}
+.yn ul{list-style:none}
+.yn li{padding:9px 0 9px 30px;position:relative;font-size:14.5px;color:var(--ink-dim);border-bottom:1px dashed rgba(255,255,255,.08)}
+.yn li:last-child{border:none}
+.yn .can li::before{content:"✓";position:absolute;left:0;color:var(--green-l);font-weight:700}
+.yn .cant li::before{content:"✗";position:absolute;left:0;color:#f87171;font-weight:700}
+.final-q{text-align:center;margin-top:30px;padding:34px 30px}
+.final-q .big{font-family:var(--serif);font-style:italic;font-size:clamp(22px,3vw,30px);line-height:1.6}
+
+/* ============ S8 AI 反思 ============ */
+.chat{max-width:820px;margin:0 auto}
+.msg{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start}
+.msg .av{flex:none;width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700}
+.msg.me .av{background:linear-gradient(135deg,var(--indigo),var(--cyan))}
+.msg.ai .av{background:linear-gradient(135deg,#475569,#64748b)}
+.bubble2{padding:16px 20px;border-radius:16px;font-size:14.5px;color:var(--ink-dim);flex:1}
+.msg.me .bubble2{background:rgba(99,102,241,.16);border:1px solid rgba(165,180,252,.3)}
+.msg.ai .bubble2{background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.bubble2 b{color:var(--ink)}
+.fixbox{margin-top:6px;padding:12px 14px;border-radius:10px;background:rgba(16,185,129,.09);
+  border:1px solid rgba(110,231,183,.3);font-size:13.5px;color:var(--green-l)}
+.fixbox b{color:var(--green-l)}
+.wrong{text-decoration:line-through;text-decoration-color:#f87171;text-decoration-thickness:2px;color:#fca5a5}
+
+footer{text-align:center;padding:60px 24px 50px;color:var(--ink-faint);font-size:13px}
+footer .div{width:60px;height:2px;margin:0 auto 18px;background:linear-gradient(90deg,transparent,var(--cyan-l),transparent)}
+
+/* 滚动显现 */
+.rv{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s ease}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.orb{animation:none}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+<div id="progress"></div>
+
+<nav>
+  <div class="nav-in">
+    <div class="nav-logo">θ · 温度的诞生</div>
+    <div class="nav-links">
+      <a href="#s1">①热平衡</a><a href="#s2">②第零定律</a><a href="#s3">③等价类</a>
+      <a href="#s4">④温标自由</a><a href="#s5">⑤循环论证</a><a href="#s6">⑥真实温标</a>
+      <a href="#s7">⑦总结</a><a href="#s8">⑧AI反思</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="kicker">物 理 化 学 · 开 放 探 究 题</div>
+  <h1>温度是怎样<span class="grad-text">"诞生"</span>的？</h1>
+  <p class="sub">假设人类还没有"温度"这个词。仅凭"热平衡"现象与热力学第零定律，<br>
+  我们为什么<b style="color:var(--ink)">有权</b>用一个标量，去标记万物的冷热？</p>
+  <div class="core-q glass">
+    <div class="lab">CORE QUESTION · 核心问题</div>
+    <div style="font-size:16.5px;line-height:1.9;color:var(--ink-dim)">
+      仅从<b style="color:var(--ink)">热平衡现象</b>与<b style="color:var(--ink)">热力学第零定律</b>出发：
+      为什么可以用一个<b class="math" style="color:var(--cyan-l)">标量</b>表征系统的冷热程度？
+      第零定律究竟<b style="color:var(--green-l)">能推出什么</b>，又<b style="color:#fca5a5">不能推出什么</b>？
+    </div>
+  </div>
+  <div class="route">
+    <span class="chip">热平衡操作定义</span><span class="chip">等价关系三性质</span>
+    <span class="chip">等价类划分</span><span class="chip">温度作为标签函数</span>
+    <span class="chip">温标的任意性</span><span class="chip">走向热力学温标</span>
+  </div>
+  <div class="meta">作品形式：交互网页 + JavaScript 模拟 ｜
+    姓名：<span contenteditable="true">点击填写</span>　学号：<span contenteditable="true">点击填写</span>　日期：2026-09-12</div>
+  <a class="scroll-hint" href="#s1" style="text-decoration:none">▼ 向下滚动，开始推理</a>
+</header>
+
+<main>
+<!-- ============ S1 热平衡 ============ -->
+<section id="s1">
+  <div class="rv"><div class="sec-tag">STEP 01</div>
+  <h2 class="title">在说出"温度"之前，<span class="grad-text">先定义"热平衡"</span></h2>
+  <p class="lead">题目最重要的规则：<b style="color:var(--ink)">不得先用"温度相等"定义热平衡</b>。
+  我们必须只使用能直接观测、能动手操作的东西。</p></div>
+
+  <div class="grid2 rv">
+    <div class="glass card">
+      <h3><span class="idx">器材</span>两种壁</h3>
+      <p class="body"><b>绝热壁</b>：两侧系统的宏观状态互不影响（近似：保温杯壁、厚泡沫）。</p>
+      <p class="body"><b>透热壁</b>：允许"热相互作用"通过（金属壁）。注意——我们只规定壁的<b>材料与操作</b>，不规定它"传什么"。</p>
+    </div>
+    <div class="glass card">
+      <h3><span class="idx">操作</span>热平衡的操作定义</h3>
+      <p class="body">两个各自处于内部平衡的系统 A、B，用<b>刚性透热壁</b>接触；
+      持续观测任意宏观可测量（压强、液柱高度、电阻、颜色……）。</p>
+      <p class="body">若经过足够长时间后，<b>所有读数都不再随时间变化</b>，就称 A、B 的这一对状态<b style="color:var(--green-l)">互为热平衡</b>，记作 <span class="math">a ~ b</span>。</p>
+    </div>
+  </div>
+
+  <div class="note key rv" style="margin-top:22px">整个定义中只出现三样东西：<b>壁、接触、读数是否变化</b>。
+  没有"温度"，没有"冷热"，也没有"热量"——它们一个都还没出生。</div>
+
+  <div class="glass sim-wrap rv">
+    <h3 style="font-size:17px;margin-bottom:4px">🧪 模拟实验：亲手"判定"一次热平衡</h3>
+    <p class="body" style="font-size:14px;margin:6px 0 14px">三个系统被绝热壁隔开，柱高代表某个可测属性 <span class="math">X</span>（任意单位，<b>不是温度</b>）。
+    点击按钮（或直接点击图中的壁）把壁换成透热壁，观察读数。</p>
+    <div class="sim-readouts">
+      <div class="rd"><div class="nm">系统 A · 属性 X</div><div class="bar"><div class="fill" id="bar0"></div></div><div class="val" id="val0">--</div></div>
+      <div class="rd"><div class="nm">系统 B · 属性 X</div><div class="bar"><div class="fill" id="bar1"></div></div><div class="val" id="val1">--</div></div>
+      <div class="rd"><div class="nm">系统 C · 属性 X</div><div class="bar"><div class="fill" id="bar2"></div></div><div class="val" id="val2">--</div></div>
+    </div>
+    <canvas id="simC" width="960" height="340"></canvas>
+    <div class="sim-gates">
+      <button class="btn ghost" id="gate0">壁 A|B：绝热壁（关闭）</button>
+      <button class="btn ghost" id="gate1">壁 B|C：绝热壁（关闭）</button>
+      <button class="btn primary" id="simReset">↻ 随机换新的三个系统</button>
+    </div>
+    <div class="sim-status">
+      <div class="ss" id="ss0">A ~ B：<b>壁未开启，无法判定</b></div>
+      <div class="ss" id="ss1">B ~ C：<b>壁未开启，无法判定</b></div>
+    </div>
+    <div class="note key" id="simCallout">
+      🎯 <b>判定完成。</b>整个过程里我们只说了"接触后读数不再变化"——<b>没有使用"温度"这个词，就完成了对热平衡的全部判定</b>。
+      这正是正确逻辑的起点。
+    </div>
+  </div>
+</section>
+
+<!-- ============ S2 三性 + 第零定律 ============ -->
+<section id="s2">
+  <div class="rv"><div class="sec-tag">STEP 02</div>
+  <h2 class="title">第零定律的逻辑结构：<span class="grad-text">它到底断言了什么？</span></h2>
+  <p class="lead">把热平衡看成定义在"所有系统的所有状态"集合上的一个关系 <span class="math">~</span>。
+  数学上，只有<b style="color:var(--ink)">等价关系</b>才能把集合划分为类。等价关系需要三条性质——逐条用实验"审讯"：</p></div>
+
+  <div class="props rv">
+    <!-- 对称 -->
+    <div class="glass prop" id="pSym">
+      <h3><span class="idx">i</span>对称性 <span class="math">a~b ⇒ b~a</span></h3>
+      <div class="svp"><svg width="230" height="120" viewBox="0 0 230 120">
+        <circle cx="55" cy="60" r="30" fill="rgba(99,102,241,.25)" stroke="#818cf8" stroke-width="1.5"/>
+        <text x="55" y="67" text-anchor="middle" fill="#c7d2fe" font-size="22" font-style="italic" font-family="Times New Roman">A</text>
+        <circle cx="175" cy="60" r="30" fill="rgba(6,182,212,.22)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="175" y="67" text-anchor="middle" fill="#a5f3fc" font-size="22" font-style="italic" font-family="Times New Roman">B</text>
+        <line class="hid" id="sy1" x1="88" y1="52" x2="142" y2="52" stroke="#67e8f9" stroke-width="2" marker-end="url(#ar)"/>
+        <line class="hid" id="sy2" x1="142" y1="70" x2="88" y2="70" stroke="#67e8f9" stroke-width="2" marker-end="url(#ar)"/>
+        <text class="hid" id="sy3" x="115" y="38" text-anchor="middle" fill="#aab4dc" font-size="12">接触后读数都不变</text>
+        <text class="hid" id="sy4" x="115" y="94" text-anchor="middle" fill="#aab4dc" font-size="12">交换位置重做：依然不变</text>
+        <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#67e8f9"/></marker></defs>
+      </svg></div>
+      <div class="vstep" id="symStep">点击按钮，按实验顺序检验。</div>
+      <button class="btn primary" data-go="sym">开始检验</button>
+      <div class="verdict ok">✓ <b>成立。</b>"接触"是相互的：A 对 B 读数无影响，B 对 A 自然也无影响。对称性直接蕴含在操作定义中。</div>
+    </div>
+    <!-- 自反 -->
+    <div class="glass prop" id="pRef">
+      <h3><span class="idx">ii</span>自反性 <span class="math">a~a</span>？</h3>
+      <div class="svp"><svg width="230" height="120" viewBox="0 0 230 120">
+        <circle cx="115" cy="62" r="32" fill="rgba(245,158,11,.15)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="115" y="70" text-anchor="middle" fill="#fde68a" font-size="24" font-style="italic" font-family="Times New Roman">A</text>
+        <path class="hid" id="rf1" d="M147,40 C185,10 195,70 150,86" fill="none" stroke="#fbbf24" stroke-width="2" marker-end="url(#ar2)"/>
+        <text class="hid" id="rf2" x="196" y="52" fill="#fcd34d" font-size="22">?</text>
+        <text class="hid" id="rf3" x="115" y="113" text-anchor="middle" fill="#fca5a5" font-size="12.5px">把 A 用壁与"自己"接触？实验上无法实现</text>
+        <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#fbbf24"/></marker></defs>
+      </svg></div>
+      <div class="vstep" id="refStep">这是三条性质中最微妙的一条，先别急着回答。</div>
+      <button class="btn primary" data-go="ref">开始检验</button>
+      <div class="verdict warn">⚠ <b>不是经验结论，而是数学约定。</b>
+      第零定律的表述只涉及<b>三个可区分系统</b>，无法令 B=C=A 推出 a~a；"自己接触自己"在实验上也无意义。
+      为了使用"等价关系"这一数学工具，我们把 <span class="math">a~a</span> 作为平凡约定<b>显式补入</b>——它不增加任何物理内容。</div>
+    </div>
+    <!-- 传递 -->
+    <div class="glass prop" id="pTr">
+      <h3><span class="idx">iii</span>传递性 <span class="math">a~b, b~c ⇒ a~c</span></h3>
+      <div class="svp"><svg width="250" height="120" viewBox="0 0 250 120">
+        <circle cx="40" cy="60" r="26" fill="rgba(99,102,241,.25)" stroke="#818cf8"/>
+        <text x="40" y="67" text-anchor="middle" fill="#c7d2fe" font-size="20" font-style="italic" font-family="Times New Roman">A</text>
+        <circle cx="125" cy="60" r="26" fill="rgba(6,182,212,.22)" stroke="#22d3ee"/>
+        <text x="125" y="67" text-anchor="middle" fill="#a5f3fc" font-size="20" font-style="italic" font-family="Times New Roman">B</text>
+        <circle cx="210" cy="60" r="26" fill="rgba(16,185,129,.22)" stroke="#34d399"/>
+        <text x="210" y="67" text-anchor="middle" fill="#a7f3d0" font-size="20" font-style="italic" font-family="Times New Roman">C</text>
+        <line class="hid" id="t1" x1="68" y1="54" x2="97" y2="54" stroke="#67e8f9" stroke-width="2" marker-end="url(#ar3)"/>
+        <line class="hid" id="t2" x1="153" y1="54" x2="182" y2="54" stroke="#67e8f9" stroke-width="2" marker-end="url(#ar3)"/>
+        <path class="hid" id="t3" d="M55,32 C125,-6 195,-6 198,32" fill="none" stroke="#6ee7b7" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#arg)"/>
+        <text class="hid" id="t4" x="125" y="8" text-anchor="middle" fill="#6ee7b7" font-size="12">定律预言：A ~ C（无需再测）</text>
+        <text class="hid" id="t5" x="125" y="100" text-anchor="middle" fill="#aab4dc" font-size="12.5">把 A、C 直接用透热壁接触验证 → 读数果然不变</text>
+        <defs><marker id="ar3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#67e8f9"/></marker>
+        <marker id="arg" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#6ee7b7"/></marker></defs>
+      </svg></div>
+      <div class="vstep" id="trStep">测出 a~b、b~c 之后，a 与 c 一定热平衡吗？这只能去问自然。</div>
+      <button class="btn primary" data-go="tr">开始检验</button>
+      <div class="verdict ok">✓ <b>实验说：成立。</b>这就是<b>热力学第零定律本身</b>（Fowler, 1931 命名）。
+      它是由实验归纳出的经验定律，<b>不是逻辑必然</b>——完全可以设想 a~b、b~c 却 a≁c 的世界，只是我们的宇宙不是这样。</div>
+    </div>
+  </div>
+
+  <div class="note rv">📌 <b>小结逻辑结构：</b>对称性来自操作定义；自反性是补入的约定；
+  <b>传递性是唯一需要实验支持、也唯一被称作"第零定律"的内容</b>。三性齐备，"热平衡"才是一个等价关系。</div>
+</section>
+
+<!-- ============ S3 等价类 ============ -->
+<section id="s3">
+  <div class="rv"><div class="sec-tag">STEP 03</div>
+  <h2 class="title">等价类：把"互相平衡的状态"<span class="grad-text">关进同一个格子</span></h2>
+  <p class="lead">等价关系在数学上保证：全体状态被<b style="color:var(--ink)">无遗漏、不重叠</b>地切成若干个等价类
+  <span class="math">[a] = { x : x ~ a }</span>。下面这个动画，就是温度"出生"的瞬间——</p></div>
+
+  <div class="glass stage-wrap rv">
+    <h3 style="font-size:16.5px;margin-bottom:12px">🕸 九张"状态卡"的归类实验</h3>
+    <p style="font-size:13.5px;color:var(--ink-dim)">A、B、C 三个系统各取 3 个状态。逐对做热平衡实验，再用第零定律推断，看看会发生什么。</p>
+    <div class="stage" id="stage">
+      <svg id="eqSvg" viewBox="0 0 960 380" preserveAspectRatio="none">
+        <g id="edgeG"></g>
+      </svg>
+      <div id="bubG"></div>
+      <div id="cardG"></div>
+    </div>
+    <div id="eqCtl">
+      <button class="btn primary" id="eqNext">① 逐对做热平衡实验</button>
+      <button class="btn ghost" id="eqReset">↻ 重新生成一批状态</button>
+      <span class="hint" id="eqHint">每次重新生成，平衡关系都是随机的，但结论永远相同。</span>
+    </div>
+    <div class="note key" id="eqCallout">
+      ✨ <b>温度，在此诞生。</b>给每个等价类<b>任意</b>贴上一个互不相同的数值标签 <span class="math">θ</span>，
+      并定义状态 <span class="math">x</span> 的"温度"就是它所在类的标签：
+      <div class="formula"><span class="math">a ~ b</span>　⟺　<span class="math">θ(a) = θ(b)</span></div>
+      这句话既是<b>温度的定义</b>，也是第零定律保证其<b>自洽</b>的定理：正因为有传递性，
+      "我和 B 同标签、B 和 C 同标签 ⇒ 我和 C 也同标签"才不会打架。
+      温度首先不是一把"尺子"，而只是<b>等价类的名字</b>。
+    </div>
+  </div>
+
+  <div class="note rv" style="margin-top:20px">🔬 <b>更严格的版本（Carathéodory / Born）：</b>
+  两个系统的平衡态由各自的状态变量刻画（如 <span class="math">(p<sub>A</sub>,V<sub>A</sub>)</span>、<span class="math">(p<sub>B</sub>,V<sub>B</sub>)</span>），
+  热平衡表现为一个方程 <span class="math">F<sub>AB</sub>=0</span>。第零定律（传递性）保证这些彼此独立的方程是<b>相容</b>的，
+  数学上可推出每个系统都存在一个态函数 <span class="math">θ</span>，使平衡条件化为 <span class="math">θ<sub>A</sub> = θ<sub>B</sub></span>。
+  温度的存在性是一个<b>定理</b>，温度的具体形式则不是。</div>
+</section>
+
+<!-- ============ S4 f(θ) ============ -->
+<section id="s4">
+  <div class="rv"><div class="sec-tag">STEP 04</div>
+  <h2 class="title">第零定律能唯一确定温度函数吗？<span class="grad-text">不能。</span></h2>
+  <p class="lead">标签只要能<b style="color:var(--ink)">区分类</b>就行。把所有标签重新起一遍名字，相等结构毫发无伤。
+  亲手换几个函数 <span class="math">θ′ = f(θ)</span> 看看：</p></div>
+
+  <div class="glass card rv" style="padding:24px 26px">
+    <div class="lab-grid">
+      <div>
+        <svg id="fSvg" viewBox="0 0 520 370" width="100%" style="max-width:520px;display:block;margin:0 auto">
+          <line x1="120" y1="30" x2="120" y2="340" stroke="rgba(255,255,255,.25)"/>
+          <line x1="400" y1="30" x2="400" y2="340" stroke="rgba(255,255,255,.25)"/>
+          <text x="120" y="20" text-anchor="middle" fill="#a5b4fc" font-size="13">经验温度 θ（6 个等价类）</text>
+          <text x="400" y="20" text-anchor="middle" fill="#67e8f9" font-size="13">新标签 θ′ = f(θ)</text>
+          <g id="fG"></g>
+        </svg>
+      </div>
+      <div>
+        <div style="display:flex;flex-direction:column;gap:9px" id="fBtns">
+          <button class="btn fbtn fpicked" data-f="id">θ′ = θ　（恒等）</button>
+          <button class="btn fbtn" data-f="fh">θ′ = 1.8θ + 32　（华氏变换）</button>
+          <button class="btn fbtn" data-f="sq">θ′ = θ²　（非线性，递增）</button>
+          <button class="btn fbtn" data-f="ex">θ′ = e^(θ/3)　（指数）</button>
+          <button class="btn fbtn" data-f="neg">θ′ = 7 − θ　（递减！）</button>
+          <button class="btn fbtn" data-f="sq2">θ′ = (θ−3)²　（标签撞车！）</button>
+        </div>
+        <div id="fStatus" style="margin-top:16px"></div>
+        <div class="glass" id="fVerdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2 rv" style="margin-top:20px">
+    <div class="glass card">
+      <h3><span class="idx">条件 1</span>保住"相等"：f 为一一对应</h3>
+      <p class="body">若 <span class="math">f</span> 不是单射（如 <span class="math">1+sin θ</span>），两个不同的类会被<b>贴成同一个标签</b>——
+      出现"θ 不同却 θ′ 相同"，温度判据直接崩溃。<b>数学条件：f 必须是双射（一一对应）。</b></p>
+    </div>
+    <div class="glass card">
+      <h3><span class="idx">条件 2</span>保住"冷热"：f 严格单调递增</h3>
+      <p class="body">但"谁更热"的<b>次序</b>并不来自第零定律（等价类之间天然没有大小！），它来自另一条经验：
+      热接触后热流的方向。一旦约定"θ 越大越热"，重标号就必须<b>严格单调递增</b>（连续温标还要求连续）。</p>
+    </div>
+  </div>
+  <div class="note rv">🧊 <b>所以第零定律给了我们什么？</b>只给了标签的<b>存在</b>与<b>相等判据</b>；
+  没给零点、没给单位、没给等距间隔、没给绝对零度。<span class="math">θ</span> 与 <span class="math">θ²</span>、摄氏度与华氏度，在第零定律面前<b>完全平等</b>。</div>
+</section>
+
+<!-- ============ S5 循环论证 ============ -->
+<section id="s5">
+  <div class="rv"><div class="sec-tag">STEP 05</div>
+  <h2 class="title">拆穿一个<span class="grad-text">循环论证</span></h2>
+  <p class="lead">待审查的原话：「<i>温度相等所以热平衡；热平衡所以温度相等；因此第零定律证明了温度的存在。</i>」
+  点击按钮逐句审讯，再看正确的逻辑链：</p></div>
+
+  <div class="circ-grid rv">
+    <div class="glass circ-box">
+      <svg viewBox="0 0 400 300" id="triSvg">
+        <defs><marker id="arrR" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L8,3.5 L0,7 Z" fill="#f87171"/></marker></defs>
+        <path d="M200,70 L112,240" stroke="#f87171" stroke-width="2" stroke-dasharray="7 5" fill="none" marker-end="url(#arrR)" opacity=".75"/>
+        <path d="M112,240 L288,240" stroke="#f87171" stroke-width="2" stroke-dasharray="7 5" fill="none" marker-end="url(#arrR)" opacity=".75"/>
+        <path d="M288,240 L200,70" stroke="#f87171" stroke-width="2" stroke-dasharray="7 5" fill="none" marker-end="url(#arrR)" opacity=".75"/>
+        <g class="tri-node" id="tn0"><circle cx="200" cy="58" r="46" fill="rgba(239,68,68,.15)" stroke="#f87171" stroke-width="1.6"/>
+          <text x="200" y="54" text-anchor="middle" fill="#fecaca" font-size="12.5">① 温度相等</text>
+          <text x="200" y="72" text-anchor="middle" fill="#fecaca" font-size="11">⇒ 热平衡？</text></g>
+        <g class="tri-node" id="tn1"><circle cx="100" cy="248" r="46" fill="rgba(239,68,68,.15)" stroke="#f87171" stroke-width="1.6"/>
+          <text x="100" y="244" text-anchor="middle" fill="#fecaca" font-size="12.5">② 热平衡</text>
+          <text x="100" y="262" text-anchor="middle" fill="#fecaca" font-size="11">⇒ 温度相等？</text></g>
+        <g class="tri-node" id="tn2"><circle cx="300" cy="248" r="46" fill="rgba(239,68,68,.15)" stroke="#f87171" stroke-width="1.6"/>
+          <text x="300" y="244" text-anchor="middle" fill="#fecaca" font-size="12.5">③ 所以温度</text>
+          <text x="300" y="262" text-anchor="middle" fill="#fecaca" font-size="11">被"证明"存在？</text></g>
+      </svg>
+      <div style="text-align:center;margin-top:8px">
+        <button class="btn primary" id="auditBtn">🔍 逐句审查</button>
+        <button class="btn ghost" id="rebuildBtn" style="display:none">✅ 按正确逻辑重建</button>
+      </div>
+    </div>
+    <div class="glass circ-box" style="padding:22px 24px">
+      <div class="audit-list" id="auditList">
+        <div class="ai" id="ai0"><b>句①</b>「温度相等所以热平衡」——"温度"在此处是一个<b>尚未定义</b>的词。用未定义概念去定义热平衡，是无效前提。</div>
+        <div class="ai" id="ai1"><b>句②</b>「热平衡所以温度相等」——若温度还没出生，"相等"无从谈起；这句话将来能成立，但它是<b>温度定义的重言式</b>，不是新发现。</div>
+        <div class="ai" id="ai2"><b>结论③</b> 第零定律没有"证明温度客观存在"。它只提供传递性；温度是我们<b>在等价类上主动构造</b>的标签函数——存在性靠构造，自洽性靠第零定律。</div>
+        <div class="note" style="margin:6px 0 0">🔗 三句话首尾互证，构成一个封闭的环——这正是"循环论证"名字的由来。</div>
+      </div>
+      <div class="chain" id="chain">
+        <div class="cstep"><div class="n">1</div><div class="ctxt"><b>操作先行：</b>用透热壁 + "读数是否变化"定义热平衡 <span class="math">a~b</span>，全程不出现"温度"。</div><div class="cline"></div></div>
+        <div class="cstep"><div class="n">2</div><div class="ctxt"><b>经验定律：</b>实验归纳出传递性（第零定律），对称性由定义给出，自反性作为约定补入。</div><div class="cline"></div></div>
+        <div class="cstep"><div class="n">3</div><div class="ctxt"><b>数学结论：</b>等价关系把全体状态划分为互不相交的等价类。</div><div class="cline"></div></div>
+        <div class="cstep"><div class="n">4</div><div class="ctxt"><b>定义温度：</b>给每个类贴标签 <span class="math">θ</span>，规定 <span class="math">a~b ⟺ θ(a)=θ(b)</span>。</div><div class="cline"></div></div>
+        <div class="cstep"><div class="n">5</div><div class="ctxt"><b>于是</b>「热平衡 ⟺ 温度相等」是定义的直接推论；第零定律保证这个定义<b>处处自洽、永不打架</b>。链条是线性的，不再回环。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S6 真实温标 ============ -->
+<section id="s6">
+  <div class="rv"><div class="sec-tag">STEP 06</div>
+  <h2 class="title">从经验标签 θ，<span class="grad-text">到一把"好尺子"</span></h2>
+  <p class="lead">能区分类 ≠ 能量出冷热。从光秃秃的 <span class="math">θ</span> 走到今天的开尔文，人类还额外规定了三件事、动用了另一条定律。</p></div>
+
+  <div class="tl rv">
+    <div class="glass tl-item">
+      <div class="era">第一层 · 需要约定</div>
+      <h3>经验温标：四件套缺一不可</h3>
+      <p class="body">① 选<b>测温物质与测温属性</b> <span class="math">X</span>（水银柱长、铂电阻、热电偶电压……）；
+      ② 选<b>参考点</b>（摄氏：冰点 0、汽点 100）；③ 规定<b>插值规则</b>（通常偷懒假定 <span class="math">X</span> 与温度<b>线性</b>）；
+      ④ 规定单位间隔。</p>
+      <p class="body">麻烦在于：<b>在两个校准点之外，不同温度计互相不一致</b>——下面可以直接玩。</p>
+    </div>
+    <div class="glass tl-item">
+      <div class="era">第二层 · 需要物理条件：理想气体模型</div>
+      <h3>理想气体温标（定容气体温度计）</h3>
+      <div class="formula">T = 273.16 K · lim<sub>p<sub>tr</sub>→0</sub> p / p<sub>tr</sub></div>
+      <p class="body">定容下气体压强随冷热变化；规定<b>水的三相点 = 273.16 K</b>（唯一基准点）；
+      再取充气压强趋于零的稀薄极限——此时一切气体行为趋于相同，读数<b>与气体种类无关</b>。这是第一个"普适"温标，但它仍依赖"理想气体"这种特殊物质，量程也受气体凝结限制。</p>
+    </div>
+    <div class="glass tl-item">
+      <div class="era">第三层 · 需要另一条定律：热力学第二定律</div>
+      <h3>热力学温标（Kelvin, 1848）</h3>
+      <p class="body"><b>卡诺定理</b>（第二定律的推论）：一切工作在两个热源间的<b>可逆热机</b>效率相同，与工质无关：
+      <span class="math">η = 1 − Q<sub>2</sub>/Q<sub>1</sub></span>。开尔文据此<b>定义</b>两温度之比：</p>
+      <div class="formula">T<sub>2</sub> / T<sub>1</sub> = Q<sub>2</sub> / Q<sub>1</sub>　<small>再以三相点 273.16 K 定单位</small></div>
+      <p class="body">它不依赖<b>任何物质</b>，存在真正的零点（<span class="math">T ≥ 0</span>，绝对零度不可达是<b>第三定律</b>），
+      并通过 <span class="math">dS = δQ/T</span> 把温度与能量、熵联系起来。2019 年起，国际单位制直接固定玻尔兹曼常数
+      <span class="math">k = 1.380649×10<sup>−23</sup> J/K</span> 来定义开尔文。现代摄氏温度：<span class="math">t/°C = T/K − 273.15</span>。</p>
+    </div>
+  </div>
+
+  <div class="glass thermo rv">
+    <div>
+      <h3 style="font-size:16px;margin-bottom:10px">🌡 经验温标的尴尬：只在定点握手言和</h3>
+      <p style="font-size:14px;color:var(--ink-dim)">三支温度计都用冰点/汽点校准为 0 和 100，中间一律"假设线性"。拖动滑块，看它们在别处差多少：</p>
+      <input type="range" id="tSlider" min="0" max="100" value="50" step="1">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-faint)"><span>冰点 0</span><span>基准读数 T* →</span><span>汽点 100</span></div>
+      <div class="thermo-note">偏差来自各物质真实属性的非线性；温度计越复杂，分歧可能越大——这正是必须走向气体温标与热力学温标的原因。</div>
+    </div>
+    <div>
+      <div class="tube-row" id="tubeRow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S7 总结 ============ -->
+<section id="s7">
+  <div class="rv"><div class="sec-tag">STEP 07</div>
+  <h2 class="title">第零定律：<span class="grad-text">它给了什么，没给什么</span></h2></div>
+  <div class="yn rv">
+    <div class="glass card can">
+      <h3 style="color:var(--green-l)">✓ 它能推出</h3>
+      <ul>
+        <li>热平衡是一个等价关系（传递性是经验核心，自反性为约定，对称性在定义中）</li>
+        <li>全体平衡态可被划分为互不相交、无一遗漏的等价类（等温类）</li>
+        <li><b>存在</b>一个态函数（标量）θ，使 a~b ⟺ θ(a)=θ(b)——"温度"这种物理量在逻辑上可以存在</li>
+        <li>温度相等是热平衡的充要条件，且该判据对任意系统普遍、自洽</li>
+      </ul>
+    </div>
+    <div class="glass card cant">
+      <h3 style="color:#fca5a5">✗ 它不能推出</h3>
+      <ul>
+        <li>哪个类更热、哪个更冷（次序要靠热流方向的额外经验）</li>
+        <li>θ 的具体函数形式：f(θ) 有无限多种，它一概无权裁决</li>
+        <li>零点、单位、等距间隔、"1 度"到底意味着多大变化</li>
+        <li>绝对零度及其不可达性（那要靠第二、第三定律）</li>
+        <li>温度与能量的定量关系、温度计读数（需要测温约定 + 第二定律）</li>
+      </ul>
+    </div>
+  </div>
+  <div class="glass final-q rv">
+    <div class="sec-tag" style="justify-content:center">FINAL ANSWER · 回到核心问题</div>
+    <div class="big">
+      温度不是藏在自然里等着被"发现"的一个数，<br>
+      而是我们替<b>热平衡等价类</b>构造的<b>标签函数</b>。<br>
+      <span class="grad-text">第零定律发放"出生证"，第二定律才赋予它"刻度尺"。</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S8 AI 反思 ============ -->
+<section id="s8">
+  <div class="rv"><div class="sec-tag">STEP 08</div>
+  <h2 class="title">AI 使用说明与<span class="grad-text">纠错记录</span></h2>
+  <p class="lead">本作品使用 AI 辅助资料检索、代码与动画生成。以下是 AI 给出<b>错误、含糊或过度推论</b>回答的三处真实环节，以及我的判断与修正：</p></div>
+
+  <div class="chat rv">
+    <div class="msg me"><div class="av">我</div><div class="bubble2">热平衡关系的<b>自反性</b>具体是怎么从第零定律推出来的？</div></div>
+    <div class="msg ai"><div class="av">AI</div><div class="bubble2">
+      <span class="wrong">"第零定律直接保证 A~A，因为任何系统都与自己温度相等。"</span>
+      <div class="fixbox">🔧 <b>我的判断与修正：</b>两处错误。(1) 用尚未定义的"温度"解释热平衡，正中题目明令禁止的循环论证；
+      (2) 第零定律原文"若 a~b 且 b~c 则 a~c"只涉及三个可区分系统，无法令 b=c=a，实验上也无法让系统"与自己接触"。
+      我回到定律原文逐字核查，并对照数学中"等价关系需要三条<b>独立</b>性质"的定义，确认：<b>自反性是人为补入的平凡约定，不是经验推论</b>。这一修正已写进第 2 步。</div>
+    </div></div>
+    <div class="msg me"><div class="av">我</div><div class="bubble2">既然温度是个数，第零定律是不是连温度的数值、单位也一并确定了？</div></div>
+    <div class="msg ai"><div class="av">AI</div><div class="bubble2">
+      <span class="wrong">"可以认为第零定律确定了温度的数值体系。"</span>
+      <div class="fixbox">🔧 <b>我的判断与修正：</b>过度推论。一个现成反例就能证伪：摄氏度 <span class="math">θ</span> 与华氏度 <span class="math">1.8θ+32</span> 同时好用且数值处处不同。
+      第零定律只约束"相等"（等价类划分），标签可被任意双射重参数化；要保留"越大数据越热"才需 f 严格单调递增；
+      零点、间隔、单位全部来自后续约定，绝对零度要等第二、第三定律。详见第 4 步的交互实验室。</div>
+    </div></div>
+    <div class="msg me"><div class="av">我</div><div class="bubble2">（核查温标基准点时）</div></div>
+    <div class="msg ai"><div class="av">AI</div><div class="bubble2">
+      <span class="wrong">"水的冰点 273.15 K 是热力学温标的定义参考点。"</span>
+      <div class="fixbox">🔧 <b>我的判断与修正：</b>混淆了两个点。定义参考点是<b>水的三相点 = 273.16 K（0.01 °C）</b>（1954 年起）；
+      冰点（1 atm 下冰水共存，0 °C）约为 273.15 K，是测量结果而非定义点；"−273.15"只是摄氏与开尔文的换算常数。
+      经查阅教材温标章节后已在第 6 步改正。</div>
+    </div></div>
+    <div class="note" style="max-width:820px;margin:20px auto 0">📝 <b>总体体会：</b>AI 擅长快速搭建代码框架与资料汇总，但在<b>逻辑层级</b>（定义 / 约定 / 经验定律 / 定理的边界）上容易"和稀泥"。
+    这道题恰好训练的就是这种分辨能力——每一句结论我都追问"这是定义、是约定，还是实验？"，再决定是否采纳。</div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="div"></div>
+  物理化学 · 开放探究题《温度是怎样"诞生"的？》<br>
+  交互网页 + JavaScript 模拟　｜　2026-09-12
+</footer>
+
+<script>
+"use strict";
+/* ============ 通用：进度条 + 滚动显现 ============ */
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* ============ S1 粒子热平衡模拟器 ============ */
+(function(){
+  const cv=document.getElementById('simC'), ctx=cv.getContext('2d');
+  const W=960,H=340, bounds=[[8,312],[328,632],[648,952]];
+  const gates=[{open:false,stable:0},{open:false,stable:0}];
+  let levels=[], parts=[];
+  // 冷→热配色
+  const stops=[[99,102,241],[6,182,212],[245,158,11],[239,68,68]];
+  function mixCol(t){
+    t=Math.max(0,Math.min(1,t)); const i=t<.33?0:t<.66?1:2, k=i===0?t/.33:i===1?(t-.33)/.33:(t-.66)/.34;
+    const a=stops[i],b=stops[i+1];
+    return `rgb(${a[0]+(b[0]-a[0])*k|0},${a[1]+(b[1]-a[1])*k|0},${a[2]+(b[2]-a[2])*k|0})`;
+  }
+  function reset(){
+    const v=[.12,.5,.88]; levels=[v[Math.random()*3|0],v[Math.random()*3|0],v[Math.random()*3|0]];
+    parts=[];
+    for(let c=0;c<3;c++)for(let i=0;i<24;i++){
+      const ang=Math.random()*Math.PI*2;
+      parts.push({c,x:bounds[c][0]+14+Math.random()*(bounds[c][1]-bounds[c][0]-28),
+        y:18+Math.random()*(H-46),vx:Math.cos(ang),vy:Math.sin(ang),r:4.5+Math.random()*2});
+    }
+    gates.forEach(g=>{g.open=false;g.stable=0});
+    syncBtns();
+    document.getElementById('simCallout').style.display='none';
+  }
+  function syncBtns(){
+    gates.forEach((g,i)=>{
+      const b=document.getElementById('gate'+i);
+      b.textContent=(i===0?'壁 A|B：':'壁 B|C：')+(g.open?'透热壁（开启，点击换回绝热壁）':'绝热壁（关闭，点击换成透热壁）');
+      b.classList.toggle('primary',g.open);
+    });
+  }
+  function toggle(i){gates[i].open=!gates[i].open;gates[i].stable=0;syncBtns();
+    document.getElementById('simCallout').style.display='none';}
+  document.getElementById('gate0').onclick=()=>toggle(0);
+  document.getElementById('gate1').onclick=()=>toggle(1);
+  document.getElementById('simReset').onclick=reset;
+  cv.addEventListener('click',e=>{
+    const r=cv.getBoundingClientRect(), x=(e.clientX-r.left)/r.width*W;
+    if(Math.abs(x-320)<24)toggle(0); else if(Math.abs(x-640)<24)toggle(1);
+  });
+
+  let last=performance.now();
+  function frame(now){
+    let dt=Math.min(.05,(now-last)/1000); last=now;
+    // 透热壁导热：平衡
+    gates.forEach((g,i)=>{
+      if(g.open){
+        const a=i,b=i+1,flow=(levels[b]-levels[a])*.85*dt;
+        levels[a]+=flow;levels[b]-=flow;
+        g.stable=Math.abs(levels[b]-levels[a])<.012?g.stable+dt:0;
+      }
+    });
+    // 粒子运动
+    for(const p of parts){
+      const sp=34+levels[p.c]*150;
+      const m=Math.hypot(p.vx,p.vy)||1; p.vx=sp*p.vx/m;p.vy=sp*p.vy/m;
+      p.x+=p.vx*dt;p.y+=p.vy*dt;
+      const[L,R]=bounds[p.c];
+      if(p.x<p.r){p.x=p.r;p.vx*=-1} if(p.x>R-p.r){p.x=R-p.r;p.vx*=-1}
+      if(p.y<p.r+4){p.y=p.r+4;p.vy*=-1} if(p.y>H-p.r-6){p.y=H-p.r-6;p.vy*=-1}
+    }
+    // 绘制
+    ctx.clearRect(0,0,W,H);
+    // 腔室底色
+    for(let c=0;c<3;c++){
+      ctx.fillStyle=`rgba(255,255,255,${.012+levels[c]*.05})`;
+      ctx.fillRect(bounds[c][0],6,bounds[c][1]-bounds[c][0],H-12);
+    }
+    // 壁
+    [320,640].forEach((x,i)=>{
+      const g=gates[i];
+      ctx.fillStyle=g.open?'rgba(103,232,249,.22)':'rgba(148,163,184,.35)';
+      ctx.fillRect(x-7,6,14,H-12);
+      ctx.strokeStyle=g.open?'#67e8f9':'#94a3b8';ctx.setLineDash(g.open?[6,6]:[]);
+      ctx.strokeRect(x-7,6,14,H-12);ctx.setLineDash([]);
+      ctx.fillStyle=g.open?'#a5f3fc':'#cbd5e1';ctx.font='11px sans-serif';ctx.textAlign='center';
+      ctx.save();ctx.translate(x,g.open?22:20);
+      ctx.fillText(g.open?'透热壁':'绝热壁',0,0);
+      ctx.restore();
+    });
+    // 粒子
+    for(const p of parts){
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle=mixCol(levels[p.c]);ctx.fill();
+    }
+    // 读数
+    for(let c=0;c<3;c++){
+      const pct=Math.round(levels[c]*100);
+      document.getElementById('bar'+c).style.width=pct+'%';
+      document.getElementById('val'+c).textContent=pct+' 格';
+    }
+    const ss=[document.getElementById('ss0'),document.getElementById('ss1')];
+    let allDone=true;
+    gates.forEach((g,i)=>{
+      if(!g.open){ss[i].innerHTML=(i===0?'A ~ B：':'B ~ C：')+'<b>壁未开启，无法判定</b>';allDone=false}
+      else if(g.stable<1.4){ss[i].innerHTML=(i===0?'A ~ B：':'B ~ C：')+'<b style="color:#fcd34d">透热壁开启，观测中…读数仍在变化</b>';allDone=false}
+      else ss[i].innerHTML=(i===0?'A ~ B：':'B ~ C：')+'<b style="color:#6ee7b7">读数已稳定 ≥ 1.4s ✓ 判定：互为热平衡</b>';
+    });
+    if(allDone)document.getElementById('simCallout').style.display='block';
+    requestAnimationFrame(frame);
+  }
+  reset();requestAnimationFrame(frame);
+})();
+
+/* ============ S2 三性检验按钮 ============ */
+(function(){
+  const seq={
+    sym:{step:document.getElementById('symStep'),max:4,
+      els:['sy1','sy2','sy3','sy4'],
+      texts:['先让 A、B 经透热壁接触……','接触后，两边所有读数都不再变化：a ~ b。',
+             '交换 A、B 的位置重做同一个实验……','操作完全对称，结果不变：b ~ a。对称性成立。']},
+    ref:{step:document.getElementById('refStep'),max:3,
+      els:['rf1','rf2','rf3'],
+      texts:['设想用一面壁把 A 和它自己连起来……','这个"实验"无法实施，也没有观测意义。',
+             '第零定律原文也帮不上忙：它说的是三个可区分的系统。']},
+    tr:{step:document.getElementById('trStep'),max:5,
+      els:['t1','t2','t3','t4','t5'],
+      texts:['实验测得：a ~ b ✓','又测得：b ~ c ✓','第零定律立刻给出预言：a ~ c——先别急，预言必须被实验检验。',
+             '把 A、C 直接用透热壁接触……','读数果然不变 ✓ 传递性得到自然界背书，它就是第零定律。']}
+  };
+  document.querySelectorAll('[data-go]').forEach(btn=>{
+    const k=btn.dataset.go, cfg=seq[k];let n=0;
+    const card=btn.closest('.prop'), verdict=card.querySelector('.verdict');
+    btn.addEventListener('click',()=>{
+      if(n>=cfg.max){ // replay
+        n=0;cfg.els.forEach(id=>document.getElementById(id).classList.remove('on'));
+        verdict.style.display='none';verdict.classList.remove('ok','warn');
+        btn.textContent='开始检验';
+      }
+      if(n<cfg.max){
+        document.getElementById(cfg.els[n]).classList.add('on');
+        cfg.step.textContent=cfg.texts[n];n++;
+        if(n===cfg.max){
+          btn.textContent='↻ 再看一遍';
+          verdict.style.display='block';
+          verdict.classList.add(k==='ref'?'warn':'ok');
+        }
+      }
+    });
+  });
+})();
+
+/* ============ S3 等价类动画 ============ */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const CLASSCOL=['#818cf8','#22d3ee','#34d399'];
+  const cardG=document.getElementById('cardG'), edgeG=document.getElementById('edgeG'),
+        bubG=document.getElementById('bubG');
+  const btn=document.getElementById('eqNext'), reset=document.getElementById('eqReset'),
+        hint=document.getElementById('eqHint'), callout=document.getElementById('eqCallout');
+  // 初始布局（归一化 960×380）
+  const rows=[{sys:'A',y:56},{sys:'B',y:190},{sys:'C',y:324}];
+  const xs=[140,480,820];
+  const clCx=[200,480,760], cy=196;
+  const offs=[[0,-78],[-78,52],[78,52]];
+  let cards=[],edges=[],phase=0,tween=null;
+  const P={ // 标签
+    0:'① 逐对做热平衡实验',1:'② 应用第零定律（传递性）',
+    2:'③ 把彼此热平衡的状态聚成等价类',3:'✔ 完成 · 再做一批'
+  };
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+  function gen(){
+    cardG.innerHTML='';edgeG.innerHTML='';bubG.innerHTML='';cards=[];edges=[];phase=0;tween=null;
+    callout.style.display='none';btn.textContent=P[0];btn.disabled=false;
+    hint.textContent='每次重新生成，平衡关系都是随机的，但结论永远相同。';
+    const assign=[shuffle([0,1,2]),shuffle([0,1,2]),shuffle([0,1,2])];
+    rows.forEach((r,ri)=>{
+      xs.forEach((x,ci)=>{
+        const cls=assign[ri][ci], id=r.sys+(ci+1);
+        const el=document.createElement('div');el.className='sc';el.textContent=id;
+        el.innerHTML='<span class="sys">系统 '+r.sys+'</span>'+id;
+        el.style.borderColor='rgba(255,255,255,.25)';
+        cardG.appendChild(el);
+        cards.push({el,id,x,y:r.y,tx:x,ty:r.y,cls,sys:r.sys,idx:ci});
+      });
+    });
+    // 同组（同 cls）三个系统各一张；实测边：A-B、B-C；传递推论：A-C
+    for(let cl=0;cl<3;cl++){
+      const A=cards.find(c=>c.sys==='A'&&c.cls===cl),
+            B=cards.find(c=>c.sys==='B'&&c.cls===cl),
+            C=cards.find(c=>c.sys==='C'&&c.cls===cl);
+      edges.push(mkEdge(A,B,'measured',cl),mkEdge(B,C,'measured',cl),mkEdge(A,C,'implied',cl));
+    }
+    // 气泡
+    clCx.forEach((cx,i)=>{
+      const b=document.createElement('div');b.className='bubble';
+      b.style.left=cx/960*100+'%';b.style.top=cy/380*100+'%';
+      b.style.background=CLASSCOL[i];
+      b.innerHTML='<span class="blab" style="color:'+CLASSCOL[i]+'">θ'+['₁','₂','₃'][i]+'</span>';
+      bubG.appendChild(b);
+    });
+    layout(1);
+  }
+  function mkEdge(a,b,kind,cl){
+    const l=document.createElementNS(NS,'line');
+    l.setAttribute('stroke',CLASSCOL[cl]);l.setAttribute('stroke-width',kind==='measured'?2.4:2);
+    l.setAttribute('stroke-dasharray',kind==='measured'?'0':'7 6');
+    l.setAttribute('opacity','0');
+    l._k=kind;
+    edgeG.appendChild(l);
+    return {l,a,b};
+  }
+  function setPos(c){
+    c.el.style.left=(c.x/960*100)+'%';c.el.style.top=(c.y/380*100)+'%';
+  }
+  function layout(alpha){
+    cards.forEach(setPos);
+    edges.forEach(e=>{
+      if(e.l._show){e.l.setAttribute('x1',e.a.x);e.l.setAttribute('y1',e.a.y);
+        e.l.setAttribute('x2',e.b.x);e.l.setAttribute('y2',e.b.y);}
+    });
+  }
+  function showEdges(kind,delay){
+    edges.filter(e=>e.l._k===kind).forEach((e,i)=>{
+      setTimeout(()=>{e.l._show=true;e.l.setAttribute('opacity',kind==='measured'?.85:.7);
+        e.l.setAttribute('x1',e.a.x);e.l.setAttribute('y1',e.a.y);
+        e.l.setAttribute('x2',e.b.x);e.l.setAttribute('y2',e.b.y);
+      },delay+i*180);
+    });
+  }
+  function tweenTo(targets,dur,done){
+    const starts=cards.map(c=>({x:c.x,y:c.y}));
+    const t0=performance.now();
+    tween={run(now){
+      const t=Math.min(1,(now-t0)/dur), k=.5-.5*Math.cos(Math.PI*t);
+      cards.forEach((c,i)=>{c.x=starts[i].x+(targets[i].x-starts[i].x)*k;
+                           c.y=starts[i].y+(targets[i].y-starts[i].y)*k;});
+      layout();
+      if(t>=1){tween=null;done&&done();}
+    }};
+  }
+  function frame(now){if(tween)tween.run(now);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+
+  btn.onclick=()=>{
+    if(phase===0){
+      showEdges('measured',120);phase=1;btn.textContent=P[1];
+      hint.textContent='6 组平衡关系全部来自逐对实验（实线）。';
+    }else if(phase===1){
+      showEdges('implied',120);phase=2;btn.textContent=P[2];
+      hint.textContent='虚线无需再做实验：a~b 且 b~c，第零定律直接给出 a~c。';
+    }else if(phase===2){
+      cards.forEach(c=>{const o=offs[c.idx];c.tx=clCx[c.cls]+o[0];c.ty=cy+o[1];});
+      tweenTo(cards.map(c=>({x:c.tx,y:c.ty})),950,()=>{
+        cards.forEach(c=>{c.el.style.borderColor=CLASSCOL[c.cls];
+          c.el.style.boxShadow='0 0 18px '+CLASSCOL[c.cls]+'66';});
+      });
+      document.querySelectorAll('.bubble').forEach(b=>b.classList.add('on'));
+      phase=3;btn.textContent=P[3];
+      hint.textContent='同色 = 同一个等价类。给它们贴上标签 θ₁、θ₂、θ₃——';
+      setTimeout(()=>callout.style.display='block',900);
+    }else gen();
+  };
+  reset.onclick=gen;
+  gen();
+})();
+
+/* ============ S4 温标变换实验室 ============ */
+(function(){
+  const NS='http://www.w3.org/2000/svg', g=document.getElementById('fG'),
+        status=document.getElementById('fStatus'), verdict=document.getElementById('fVerdict');
+  const funcs={
+    id:{f:t=>t, name:'θ′ = θ'},
+    fh:{f:t=>1.8*t+32, name:'θ′ = 1.8θ + 32'},
+    sq:{f:t=>t*t, name:'θ′ = θ²'},
+    ex:{f:t=>Math.exp(t/3), name:'θ′ = e^{θ/3}'},
+    neg:{f:t=>7-t, name:'θ′ = 7 − θ'},
+    sq2:{f:t=>(t-3)*(t-3), name:'θ′ = (θ−3)²'}
+  };
+  const yI=i=>40+i*56;              // 左轴 1..6
+  function draw(key){
+    g.innerHTML='';
+    const cfg=funcs[key], ys=[1,2,3,4,5,6].map(cfg.f);
+    let mn=Math.min(...ys),mx=Math.max(...ys);if(mx===mn)mx=mn+1;
+    const seen={};
+    // 映射线 + 端点
+    ys.forEach((v,i)=>{
+      const y2=40+(mx-v)/(mx-mn)*280;
+      const collide=Object.keys(seen).some(k=>Math.abs(k-v)<1e-9);
+      seen[v]=true;
+      const x1=120,y1=yI(i+1);
+      const l=document.createElementNS(NS,'line');
+      l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',400);l.setAttribute('y2',y2);
+      l.setAttribute('stroke',collide?'#f87171':'#67e8f9');l.setAttribute('stroke-width','1.8');
+      l.setAttribute('opacity','0');l.setAttribute('stroke-dasharray','320');l.setAttribute('stroke-dashoffset','320');
+      g.appendChild(l);
+      setTimeout(()=>{l.setAttribute('opacity','.7');
+        l.style.transition='stroke-dashoffset .6s';l.setAttribute('stroke-dashoffset','0');},80+i*90);
+      [[x1,y1,'#a5b4fc',i+1],[400,y2,collide?'#f87171':'#67e8f9',
+        Math.abs(v)>99?v.toExponential(1):(Math.round(v*100)/100)]].forEach(([x,y,col,txt],q)=>{
+        const c=document.createElementNS(NS,'circle');
+        c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',q&&collide?8:6.5);
+        c.setAttribute('fill','#0b1026');c.setAttribute('stroke',col);c.setAttribute('stroke-width','2');
+        c.setAttribute('opacity','0');
+        g.appendChild(c);setTimeout(()=>c.setAttribute('opacity','1'),500+i*90+q*120);
+        const t=document.createElementNS(NS,'text');
+        t.setAttribute('x',x+(q?16:-16));t.setAttribute('y',y+4);
+        t.setAttribute('text-anchor',q?'start':'end');t.setAttribute('fill',col);
+        t.setAttribute('font-size','12.5');t.setAttribute('font-style','italic');
+        t.setAttribute('font-family','Times New Roman');t.textContent=txt;t.setAttribute('opacity','0');
+        g.appendChild(t);setTimeout(()=>t.setAttribute('opacity','1'),500+i*90+q*120);
+      });
+    });
+    // 判定
+    const uniq=new Set(ys.map(v=>v.toFixed(10)));
+    const injective=uniq.size===6;
+    let increasing=true,decreasing=true;
+    for(let i=1;i<6;i++){if(ys[i]<=ys[i-1])increasing=false;if(ys[i]>=ys[i-1])decreasing=false;}
+    status.innerHTML=
+      '<span class="chip '+(injective?'ok':'no')+'">'+(injective?'✓':'✗')+' 相等关系保持：f 是否为一一对应（单射）</span>'+
+      '<span class="chip '+(increasing?'ok':decreasing?'warn':'no')+'">'+(increasing?'✓ 冷热顺序保持：f 严格单调递增':
+        decreasing?'⚠ 顺序整个颠倒：f 严格递减（反向标定仍可用，但"越大越热"被反转）':'✗ 顺序被打乱：f 非单调')+'</span>';
+    verdict.style.display='block';
+    if(injective&&increasing)
+      verdict.innerHTML='✅ <b>合格温标。</b>'+cfg.name+' 既不合并等价类，又保持冷热次序——历史上华氏度正是这样一种合法的重标号。数值体系变了，物理毫无损失。';
+    else if(injective&&decreasing)
+      verdict.innerHTML='🌀 <b>数学上仍一一对应</b>（相等关系保住了），但次序反转：读数越大反而越冷。除非把"热"的定义也反过来，否则不宜采用。';
+    else if(injective)
+      verdict.innerHTML='⚠ <b>一一对应但不单调：</b>类没有被合并，但"谁热谁冷"的次序被打乱，连线互相交叉。失去了温度作为"冷热标尺"的意义。';
+    else
+      verdict.innerHTML='❌ <b>不能作为温标。</b>不同的等价类被映到了同一数值（红点重合）：将出现"θ 不同但 θ′ 相同却不热平衡"，直接违背温度判据。';
+  }
+  document.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('fpicked'));
+    b.classList.add('fpicked');draw(b.dataset.f);
+  });
+  draw('id');
+})();
+
+/* ============ S5 循环论证 ============ */
+(function(){
+  const audit=document.getElementById('auditBtn'),rebuild=document.getElementById('rebuildBtn'),
+        list=document.getElementById('auditList'),chain=document.getElementById('chain'),
+        items=[...document.querySelectorAll('.ai')];
+  let lit=0;
+  audit.onclick=()=>{
+    if(lit<3){items[lit].classList.add('lit');lit++;
+      if(lit===3){audit.textContent='↻ 再审一遍';rebuild.style.display='inline-flex';}}
+    else{
+      items.forEach(i=>i.classList.remove('lit'));lit=0;
+      audit.textContent='🔍 逐句审查';chain.classList.remove('on');
+      rebuild.style.display='none';list.style.display='block';
+    }
+  };
+  rebuild.onclick=()=>{
+    list.style.display='none';rebuild.style.display='none';
+    chain.classList.add('on');
+    chain.querySelectorAll('.cstep').forEach((s,i)=>{s.style.transitionDelay=(i*.28)+'s';});
+  };
+})();
+
+/* ============ S6 温度计分歧模拟 ============ */
+(function(){
+  const row=document.getElementById('tubeRow'),slider=document.getElementById('tSlider');
+  const defs=[
+    {name:'水银温度计',col:'linear-gradient(180deg,#67e8f9,#6366f1)',f:t=>t+.16*t*(100-t)/100},
+    {name:'酒精温度计',col:'linear-gradient(180deg,#6ee7b7,#10b981)',f:t=>t-.14*t*(100-t)/100},
+    {name:'热电偶',col:'linear-gradient(180deg,#fde68a,#f59e0b)',f:t=>t+.11*t*(100-t)/100*Math.sin(t/9)}
+  ];
+  defs.forEach(d=>{
+    const w=document.createElement('div');w.className='tube fix';
+    w.innerHTML='<div class="tval">--</div><div class="tlab">'+d.name+'</div><div class="liq" style="background:'+d.col+'"></div>';
+    row.appendChild(w);d.w=w;
+  });
+  function upd(){
+    const t=+slider.value;
+    defs.forEach(d=>{
+      const v=d.f(t);
+      d.w.querySelector('.liq').style.height=Math.max(0,Math.min(100,v))+'%';
+      d.w.querySelector('.tval').textContent=v.toFixed(1)+' °';
+    });
+  }
+  slider.oninput=upd;upd();
+})();
+</script>
+</body>
+</html>
