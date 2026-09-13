@@ -21,7 +21,7 @@ function getCurrentUser() {
 
 const currentUser = getCurrentUser();
 if (!currentUser) {
-    window.location.href = 'auth.html';
+    window.location.href = 'main.html';
 }
 
 /* -------- 用户资料 -------- */

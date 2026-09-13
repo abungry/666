@@ -13,13 +13,17 @@ function showToast(msg, type = 'info') {
     setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-/* -------- 获取用户信息 -------- */
+/* -------- 获取用户信息（无登录态时注入默认访客，直接进入主页） -------- */
 function getCurrentUser() {
-    try { return JSON.parse(localStorage.getItem('sac_current_user')); }
-    catch { return null; }
+    try {
+        const u = JSON.parse(localStorage.getItem('sac_current_user'));
+        if (u) return u;
+    } catch {}
+    const guest = { id: 'SAC_GUEST', username: '探索者', phone: '' };
+    localStorage.setItem('sac_current_user', JSON.stringify(guest));
+    return guest;
 }
 const currentUser = getCurrentUser();
-if (!currentUser) { window.location.href = 'auth.html'; }
 
 const userProfile = (function () {
     try { return JSON.parse(localStorage.getItem('sac_user_profile')); }
@@ -1052,11 +1056,9 @@ function toggleFav(btn) {
     localStorage.setItem('sac_favorites', JSON.stringify(favs));
 }
 
-/* ==================== 退出登录 ==================== */
+/* ==================== 退出登录（已移除登录页，保留为刷新会话） ==================== */
 function logout() {
-    localStorage.removeItem('sac_current_user');
-    showToast('已退出登录', 'info');
-    setTimeout(() => { window.location.href = 'auth.html'; }, 1000);
+    showToast('已免登录，无需退出', 'info');
 }
 
 /* ==================== 天气详情弹窗 ==================== */
