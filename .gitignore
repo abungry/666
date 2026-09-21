@@ -1,0 +1,11 @@
+# Word/Office 临时锁文件
+~$*
+*.tmp
+
+# 日志与本地调试
+*.log
+debug.log
+
+# 系统文件
+Thumbs.db
+.DS_Store

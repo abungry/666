@@ -1,3 +1,4 @@
+﻿/* 作者：周梓润 */
 /* ============================================================
    Spatial AI Companion - 主界面
    ============================================================ */
@@ -24,6 +25,16 @@ function getCurrentUser() {
     return guest;
 }
 const currentUser = getCurrentUser();
+
+// 免登录模式：未完成引导则先去引导页（防止直接访问 main.html 绕过引导）
+(function () {
+    try {
+        var done = JSON.parse(localStorage.getItem('sac_onboarding_done') || '{}');
+        if (!done[currentUser.id]) {
+            location.replace('welcome.html');
+        }
+    } catch (e) {}
+})();
 
 const userProfile = (function () {
     try { return JSON.parse(localStorage.getItem('sac_user_profile')); }

@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 作者：周梓润 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spatial AI Companion - 主界面</title>
@@ -185,7 +186,7 @@
             <i class="fas fa-map-location-dot"></i>
             <span>地图</span>
         </button>
-        <button class="nav-item center-btn" onclick="switchTab('explore', document.querySelector('.nav-item[data-tab=explore]'))">
+        <button class="nav-item center-btn" onclick="openEnergyPlanner()">
             <div class="center-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
         </button>
         <button class="nav-item" data-tab="explore" onclick="switchTab('explore', this)">
@@ -361,6 +362,8 @@
     </div>
 
     <script src="beijing_places.js"></script>
+    <link rel="stylesheet" href="energy.css">
+    <script src="energy.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
