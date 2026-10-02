@@ -11,6 +11,6 @@ Thumbs.db
 .DS_Store
 
 # Node 后端依赖与密钥（同学的 DeepSeek 服务）
-.env
+# .env  # 临时允许推送，含真实 API Key
 node_modules/
 npm-debug.log*
