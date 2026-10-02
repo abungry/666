@@ -1,17 +1,19 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <!-- 作者：周梓润 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spatial AI Companion - 主界面</title>
+    <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="refresh.css">
 </head>
 <body>
     <!-- 动态背景 -->
@@ -19,18 +21,20 @@
         <div class="bg-blob blob-1"></div>
         <div class="bg-blob blob-2"></div>
         <div class="bg-blob blob-3"></div>
+        <div class="bg-stars"></div>
     </div>
 
     <!-- 顶部栏 -->
     <header class="app-header">
         <div class="header-left">
-            <div class="app-logo"><i class="fas fa-compass-drafting"></i></div>
+            <div class="app-logo"><i class="fas fa-location-crosshairs"></i></div>
             <div>
                 <h1>Spatial AI Companion</h1>
                 <p><i class="fas fa-location-dot"></i> <span id="current-loc">北京·海淀区</span></p>
             </div>
         </div>
         <div class="header-right">
+            <button class="header-btn" title="我的记忆库" onclick="openMemoryLibrary()"><i class="fas fa-bookmark"></i></button>
             <button class="header-btn" title="天气" onclick="toggleWeatherModal()"><i class="fas fa-cloud-sun"></i></button>
             <div class="user-avatar" id="user-avatar">U</div>
         </div>
@@ -44,26 +48,44 @@
             <div class="chat-container">
                 <!-- 对话列表 -->
                 <div class="chat-messages" id="chat-messages">
-                    <!-- 欢迎消息 -->
-                    <div class="msg ai-msg">
-                        <div class="msg-avatar ai"><i class="fas fa-robot"></i></div>
-                        <div class="msg-bubble">
-                            <div class="msg-name">Spatial AI</div>
-                            <p>你好！我是你的空间智能伙伴 🌿 告诉我你想找什么样的地方，我会结合遥感环境数据为你推荐最适合的空间。</p>
-                            <div class="quick-suggests">
-                                <button class="suggest-chip" onclick="sendSuggest('想找一个安静、绿色、步行强度不高的地方')"><i class="fas fa-leaf"></i> 安静的绿地</button>
-                                <button class="suggest-chip" onclick="sendSuggest('附近有水边适合休闲的地方')"><i class="fas fa-water"></i> 水边休闲</button>
-                                <button class="suggest-chip" onclick="sendSuggest('想找适合半天轻徒步的地方')"><i class="fas fa-person-hiking"></i> 轻徒步</button>
-                            </div>
+                    <!-- 空状态 -->
+                    <div class="chat-empty" id="chat-empty">
+                        <div class="chat-empty-orb"><i class="fas fa-location-crosshairs"></i></div>
+                        <h2 class="chat-empty-title">今天想去哪里走走？</h2>
+                        <p class="chat-empty-sub">告诉我你的心情、体力或同行的人，我会结合地形、绿地和水体数据，推荐此刻最适合你的地方。</p>
+                        <div class="prompt-grid">
+                            <button class="prompt-card prompt-card--accent" onclick="directRecommend()">
+                                <i class="fas fa-wand-magic-sparkles"></i>
+                                <strong>直接推荐</strong>
+                                <span>根据我的记忆库</span>
+                            </button>
+                            <button class="prompt-card" onclick="sendSuggest('想找一个安静、绿色、步行强度不高的地方')">
+                                <i class="fas fa-tree"></i>
+                                <strong>安静的绿地</strong>
+                                <span>散步放空，不太累</span>
+                            </button>
+                            <button class="prompt-card" onclick="sendSuggest('附近有水边适合休闲的地方')">
+                                <i class="fas fa-water"></i>
+                                <strong>水边休闲</strong>
+                                <span>湖边、河岸、湿地</span>
+                            </button>
+                            <button class="prompt-card" onclick="sendSuggest('想找适合半天轻徒步的地方')">
+                                <i class="fas fa-person-hiking"></i>
+                                <strong>轻徒步</strong>
+                                <span>半天就能走完</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 输入区 -->
                 <div class="chat-input-area">
-                    <button class="input-action" title="语音"><i class="fas fa-microphone"></i></button>
-                    <input type="text" id="chat-input" placeholder="描述你想去的地方..." onkeypress="if(event.key==='Enter')sendMessage()">
-                    <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                    <div class="composer" id="composer">
+                        <button class="composer-btn direct-action" title="根据记忆直接推荐" onclick="directRecommend()"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        <input type="text" id="chat-input" placeholder="描述你想去的地方..." autocomplete="off" oninput="syncComposer()" onkeypress="if(event.key==='Enter')sendMessage()">
+                        <button class="composer-btn" title="语音" onclick="showToast('语音输入还在准备中', 'info')"><i class="fas fa-microphone"></i></button>
+                        <button class="send-btn" onclick="sendMessage()" title="发送" aria-label="发送"><i class="fas fa-arrow-up"></i></button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -75,14 +97,20 @@
                 <!-- 地图浮动搜索框 -->
                 <div class="map-search-float">
                     <i class="fas fa-magnifying-glass"></i>
-                    <input type="text" placeholder="搜索地点、公园、路线...">
+                    <input type="text" id="map-search-input" placeholder="搜索地点、公园、路线..." onkeypress="if(event.key==='Enter')submitMapSearch()">
                     <button class="map-btn" title="回到我的位置" onclick="recenterMainMap()"><i class="fas fa-location-crosshairs"></i></button>
                 </div>
                 <!-- 图层切换 -->
                 <div class="map-layer-switch">
                     <button class="layer-btn active" data-layer="gaode" onclick="switchLayer('gaode')"><i class="fas fa-map"></i> 标准</button>
-                    <button class="layer-btn" data-layer="satellite" onclick="switchLayer('satellite')"><i class="fas fa-satellite"></i> 卫星</button>
+                    <button class="layer-btn" data-layer="satellite" onclick="switchLayer('satellite')"><i class="fas fa-satellite"></i> 高德卫星</button>
+                    <button class="layer-btn" data-layer="terrain" onclick="switchLayer('terrain')"><i class="fas fa-mountain"></i> 地形</button>
+                    <button class="layer-btn" data-layer="tdt-img" onclick="switchLayer('tdt-img')"><i class="fas fa-satellite-dish"></i> 天地图影像</button>
                 </div>
+                <!-- OSM 自然景观叠加层开关 -->
+                <button class="osm-toggle-btn" id="osm-toggle-btn" onclick="toggleOsmNature()" title="叠加 OpenStreetMap 自然景观：水体/林地/山峰/步道/保护区">
+                    <i class="fas fa-tree"></i> 自然要素
+                </button>
             </div>
         </section>
 
@@ -92,7 +120,7 @@
                 <!-- 推荐标题 -->
                 <div class="explore-header">
                     <div>
-                        <h2><i class="fas fa-sparkles"></i> 为你推荐</h2>
+                        <h2><i class="fas fa-wand-magic-sparkles"></i> 为你推荐</h2>
                         <p>基于你的画像与空间环境数据智能匹配</p>
                     </div>
                     <button class="refresh-btn" onclick="refreshRecommendations()" title="刷新推荐">
@@ -103,12 +131,12 @@
                 <!-- 筛选条件 -->
                 <div class="filter-row">
                     <div class="filter-scroll">
-                        <button class="filter-chip active" onclick="filterRecommend('all', this)">全部</button>
-                        <button class="filter-chip" onclick="filterRecommend('nature', this)"><i class="fas fa-tree"></i> 自然</button>
-                        <button class="filter-chip" onclick="filterRecommend('water', this)"><i class="fas fa-water"></i> 水边</button>
-                        <button class="filter-chip" onclick="filterRecommend('mountain', this)"><i class="fas fa-mountain"></i> 山地</button>
-                        <button class="filter-chip" onclick="filterRecommend('culture', this)"><i class="fas fa-landmark"></i> 人文</button>
-                        <button class="filter-chip" onclick="filterRecommend('relax', this)"><i class="fas fa-couch"></i> 休闲</button>
+                        <button class="filter-chip active" data-filter="all" onclick="filterRecommend('all', this)">全部</button>
+                        <button class="filter-chip" data-filter="nature" onclick="filterRecommend('nature', this)"><i class="fas fa-tree"></i> 自然</button>
+                        <button class="filter-chip" data-filter="water" onclick="filterRecommend('water', this)"><i class="fas fa-water"></i> 水边</button>
+                        <button class="filter-chip" data-filter="mountain" onclick="filterRecommend('mountain', this)"><i class="fas fa-mountain"></i> 山地</button>
+                        <button class="filter-chip" data-filter="culture" onclick="filterRecommend('culture', this)"><i class="fas fa-landmark"></i> 人文</button>
+                        <button class="filter-chip" data-filter="relax" onclick="filterRecommend('relax', this)"><i class="fas fa-couch"></i> 休闲</button>
                     </div>
                 </div>
 
@@ -165,8 +193,14 @@
                         <span>偏好设置</span>
                         <i class="fas fa-chevron-right menu-arrow"></i>
                     </div>
+                    <div class="menu-item" onclick="openMemoryLibrary()">
+                        <i class="fas fa-bookmark menu-icon purple"></i>
+                        <span>我的记忆库</span>
+                        <span class="memory-count-badge" id="memory-count-badge">0</span>
+                        <i class="fas fa-chevron-right menu-arrow"></i>
+                    </div>
                     <div class="menu-item" onclick="openAbout()">
-                        <i class="fas fa-circle-info menu-icon purple"></i>
+                        <i class="fas fa-circle-info menu-icon slate"></i>
                         <span>关于 Spatial AI</span>
                         <i class="fas fa-chevron-right menu-arrow"></i>
                     </div>
@@ -178,16 +212,17 @@
 
     <!-- 底部导航栏 -->
     <nav class="bottom-nav">
+        <span class="nav-indicator" aria-hidden="true"></span>
         <button class="nav-item active" data-tab="chat" onclick="switchTab('chat', this)">
-            <i class="fas fa-comments"></i>
+            <i class="fas fa-comment-dots"></i>
             <span>对话</span>
         </button>
         <button class="nav-item" data-tab="map" onclick="switchTab('map', this)">
-            <i class="fas fa-map-location-dot"></i>
+            <i class="fas fa-map"></i>
             <span>地图</span>
         </button>
-        <button class="nav-item center-btn" onclick="openEnergyPlanner()">
-            <div class="center-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <button class="nav-item center-btn" onclick="openEnergyPlanner()" title="精力规划">
+            <div class="center-icon"><i class="fas fa-bolt"></i></div>
         </button>
         <button class="nav-item" data-tab="explore" onclick="switchTab('explore', this)">
             <i class="fas fa-compass"></i>
@@ -326,6 +361,9 @@
     <!-- Toast -->
     <div class="toast-container" id="toast-container"></div>
 
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- 通用侧滑面板 -->
     <div class="sp-panel-overlay" id="sp-panel" onclick="if(event.target===this)closeSidePanel()">
         <div class="sp-panel">
@@ -362,7 +400,10 @@
     </div>
 
     <script src="beijing_places.js"></script>
+    <script src="beijing_places_extended.js"></script>
     <link rel="stylesheet" href="energy.css">
+    <link rel="stylesheet" href="energy-refresh.css">
+    <link rel="stylesheet" href="look.css">
     <script src="energy.js"></script>
     <script src="main.js"></script>
 </body>

@@ -1,0 +1,176 @@
+/* Spatial AI Companion — shared visual system
+   Direction: 暖墨手册 — charcoal + clay, flat surfaces */
+
+:root {
+    /* Brand */
+    --primary: #e07a3d;
+    --primary-dark: #9a4a1c;
+    --primary-light: #f0c19a;
+    --accent: #e8c4a8;
+    --accent-2: #f0c19a;
+    --warm: #f0c674;
+    --pink: #e8a4c8;
+    --yellow: #f0c674;
+    --orange: #fb923c;
+    --violet: #7c8fd4;
+
+    /* Surfaces */
+    --bg-dark: #070f1a;
+    --bg-mid: #0e1c2e;
+    --bg-deep: #050b14;
+    --bg-elevated: rgba(16, 28, 46, 0.82);
+    --bg-card: rgba(255, 255, 255, 0.045);
+    --bg-card-hover: rgba(255, 255, 255, 0.075);
+    --bg-glass: rgba(10, 22, 38, 0.72);
+
+    /* Lines & text */
+    --border: rgba(148, 197, 220, 0.12);
+    --border-strong: rgba(148, 197, 220, 0.26);
+    --text: #f0f7fb;
+    --text-muted: #8fa6bb;
+    --text-dim: #6b8299;
+
+    /* Feedback */
+    --success: #34d399;
+    --danger: #f87171;
+    --warning: #fbbf24;
+
+    /* Shape */
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-lg: 22px;
+    --radius-pill: 999px;
+
+    /* Elevation — soft, not neon */
+    --shadow-soft: 0 8px 28px rgba(0, 0, 0, 0.32);
+    --shadow-lift: 0 14px 40px rgba(0, 0, 0, 0.38);
+    --shadow-primary: 0 8px 24px rgba(224, 122, 61, 0.28);
+    --glow-primary: 0 0 20px rgba(224, 122, 61, 0.16);
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --dur-fast: 0.18s;
+    --dur: 0.28s;
+    --dur-slow: 0.45s;
+
+    /* Type */
+    --font: 'Sora', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-display: 'Sora', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* ---------- Base resets shared across pages ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+::selection {
+    background: rgba(224, 122, 61, 0.35);
+    color: #fff;
+}
+
+body::after { display: none; }
+
+/* Scrollbar polish */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 197, 220, 0.22);
+    border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(240, 193, 154, 0.4); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ---------- Shared interactive polish ---------- */
+button,
+.suggest-chip,
+.filter-chip,
+.layer-btn,
+.menu-item,
+.feature-card,
+.primary-btn,
+.nav-item,
+.header-btn {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+.suggest-chip:focus-visible,
+.filter-chip:focus-visible,
+.header-btn:focus-visible,
+.nav-item:focus-visible,
+.primary-btn:focus-visible,
+.input-action:focus-visible,
+.send-btn:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
+/* Shared primary CTA language */
+.primary-btn,
+.start-explore-btn,
+.e-cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.primary-btn::after,
+.start-explore-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.55s var(--ease-out);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.primary-btn:hover::after,
+.start-explore-btn:hover::after {
+    transform: translateX(120%);
+}
+
+.primary-btn > *,
+.start-explore-btn > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Shared glass surface helper */
+.glass-surface {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px) saturate(1.15);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
+    border: 1px solid var(--border);
+}
+
+/* Entrance utilities */
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-scale {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes soft-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+}
+
+.anim-fade-up { animation: fade-up 0.55s var(--ease-out) both; }
+.anim-delay-1 { animation-delay: 0.08s; }
+.anim-delay-2 { animation-delay: 0.16s; }
+.anim-delay-3 { animation-delay: 0.24s; }
+.anim-delay-4 { animation-delay: 0.32s; }

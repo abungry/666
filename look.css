@@ -1,0 +1,259 @@
+/* Spatial AI Companion — 暖墨手册
+   Flat charcoal, clay accent, docked chrome. No glow, grain, or floating glass. */
+
+:root {
+    --primary: #e07a3d;
+    --primary-dark: #c45c26;
+    --primary-light: #f0c19a;
+    --accent: #e8c4a8;
+    --accent-2: #f6f1ea;
+    --warm: #e8c4a8;
+    --pink: #e7a3b5;
+    --yellow: #e8c4a8;
+    --orange: #e07a3d;
+    --violet: #c4b5a5;
+    --bg-dark: #161311;
+    --bg-mid: #1e1a17;
+    --bg-deep: #100e0c;
+    --bg-elevated: #221e1a;
+    --bg-card: #221e1a;
+    --bg-card-hover: #2a2520;
+    --bg-glass: #1e1a17;
+    --border: rgba(232, 212, 190, 0.16);
+    --border-strong: rgba(232, 212, 190, 0.32);
+    --text: #f6f1ea;
+    --text-muted: #b7aa9c;
+    --text-dim: #8c7f72;
+    --success: #e07a3d;
+    --danger: #e07a6a;
+    --warning: #e0b15a;
+    --shadow-soft: none;
+    --shadow-lift: none;
+    --shadow-primary: none;
+    --glow-primary: none;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+}
+
+::selection {
+    background: rgba(224, 122, 61, 0.35);
+    color: #fff;
+}
+
+body::after { display: none; }
+
+body {
+    background: #161311;
+    color: var(--text);
+}
+
+.bg-animation,
+.bg-blob,
+.bg-stars,
+.energy-bg {
+    display: none !important;
+}
+
+/* Solid header */
+.app-header {
+    background: #161311;
+    border-bottom: 1px solid rgba(232, 212, 190, 0.14);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.app-logo,
+.center-icon,
+.chat-empty-orb,
+.mascot-orb,
+.primary-btn,
+.send-btn,
+.composer.has-text .send-btn {
+    background: #e07a3d;
+    box-shadow: none;
+    animation: none;
+}
+.app-logo::after,
+.mascot-orb::before,
+.primary-btn::before,
+.primary-btn::after,
+.start-explore-btn::after { display: none; }
+.mascot-shadow { display: none; }
+.brand-mark .dot { box-shadow: none; animation: none; }
+.header-btn:hover,
+.center-icon:hover,
+.prompt-card:hover,
+.feature-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Docked tab bar */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    min-height: 60px;
+    padding: 4px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    border: none;
+    border-radius: 0;
+    border-top: 1px solid rgba(232, 212, 190, 0.16);
+    background: #1c1916;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+}
+.bottom-nav::before { display: none; }
+.nav-indicator {
+    background: rgba(224, 122, 61, 0.16);
+    border-radius: 10px;
+}
+.nav-item,
+.nav-item[data-tab="chat"].active,
+.nav-item[data-tab="map"].active,
+.nav-item[data-tab="explore"].active,
+.nav-item[data-tab="profile"].active {
+    color: #b7aa9c;
+}
+.nav-item.active { color: #f6f1ea; }
+.center-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+}
+.center-icon:hover,
+.center-icon:active { transform: none; }
+
+.chat-container { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+.explore-container,
+.profile-page { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* Chat */
+.chat-empty-orb { border-radius: 14px; }
+.prompt-card,
+.feature-card,
+.recommend-reason-card,
+.menu-list,
+.stat-item,
+.user-card {
+    background: #221e1a;
+    border: 1px solid rgba(232, 212, 190, 0.14);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.prompt-card i { background: rgba(224, 122, 61, 0.16); color: #f0c19a; }
+.prompt-card--accent i { background: #e07a3d; color: #fff; }
+.msg.user-msg .msg-bubble {
+    background: #3a2a22;
+    border: 1px solid rgba(224, 122, 61, 0.28);
+    border-radius: 14px 14px 4px 14px;
+}
+
+.chat-input-area {
+    background: #161311;
+    border-top: 1px solid rgba(232, 212, 190, 0.14);
+    backdrop-filter: none;
+    padding-bottom: 12px;
+}
+.composer {
+    border-radius: 12px;
+    background: #221e1a;
+    border: 1px solid rgba(232, 212, 190, 0.18);
+    box-shadow: none;
+}
+.composer:focus-within {
+    border-color: #e07a3d;
+    box-shadow: none;
+}
+.gradient-text {
+    background: none;
+    -webkit-text-fill-color: #f0c19a;
+    color: #f0c19a;
+}
+
+/* Map chrome sits on the map, not in a glass pill */
+.map-search-float,
+.map-layer-switch,
+#main-map .leaflet-control-zoom a {
+    background: #1c1916 !important;
+    box-shadow: none !important;
+    border-radius: 10px !important;
+}
+.layer-btn.active {
+    background: #e07a3d;
+    color: #fff;
+}
+#main-map .leaflet-bottom { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+.nav-panel { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+
+.card-go-btn,
+.filter-chip,
+.refresh-btn { border-radius: 8px; }
+.toast { border-radius: 10px !important; background: #221e1a !important; }
+
+/* Energy planner sheet */
+.energy-overlay {
+    background: #161311;
+}
+.energy-panel {
+    background: #161311;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    height: 100%;
+}
+.e-back,
+.hearts-card,
+.now-stop,
+.route-card,
+.advice-card {
+    background: #221e1a;
+    box-shadow: none;
+}
+.act-btn.go,
+.e-cta,
+.advice-acts .aa-main {
+    background: #e07a3d;
+    box-shadow: none;
+    animation: none;
+}
+.e-tip-bar {
+    background: #221e1a;
+    border: 1px solid rgba(232, 212, 190, 0.16);
+    color: #b7aa9c;
+}
+.e-tip-bar i { color: #e07a3d; }
+.rc-path.done { filter: none; animation: none; }
+.stop-node.current .stop-bubble {
+    box-shadow: 0 0 0 2px #e07a3d;
+}
+.stop-node.current::before { animation: none; }
+.to-badge {
+    background: #e07a3d;
+    color: #fff;
+    animation: none;
+}
+.to-badge::after { display: none; }
+.about-logo {
+    background: #e07a3d;
+    box-shadow: none;
+}
+
+.feature-icon.icon-satellite,
+.feature-icon.icon-mountain,
+.feature-icon.icon-brain,
+.icon-satellite,
+.icon-mountain,
+.icon-brain {
+    background: #c45c26;
+}
+.icon-route { background: #8a5a3a; }

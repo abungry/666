@@ -9,3 +9,8 @@ debug.log
 # 系统文件
 Thumbs.db
 .DS_Store
+
+# Node 后端依赖与密钥（同学的 DeepSeek 服务）
+.env
+node_modules/
+npm-debug.log*

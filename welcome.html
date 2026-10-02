@@ -1,13 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <!-- 作者：周梓润 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spatial AI Companion - 欢迎入驻</title>
+    <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="welcome.css">
+    <link rel="stylesheet" href="look.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Leaflet 地图 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -24,10 +26,11 @@
     <!-- ============ Step 1: 欢迎页 ============ -->
     <section class="onboard-screen active" id="screen-welcome">
         <div class="welcome-content">
-            <!-- 可爱吉祥物 -->
+            <div class="brand-mark"><span class="dot"></span> Spatial AI</div>
+
             <div class="mascot">
                 <div class="mascot-orb">
-                    <i class="fas fa-compass-drafting"></i>
+                    <i class="fas fa-location-crosshairs"></i>
                     <div class="mascot-eye left"></div>
                     <div class="mascot-eye right"></div>
                     <div class="mascot-mouth"></div>
@@ -35,8 +38,8 @@
                 <div class="mascot-shadow"></div>
             </div>
 
-            <h1 class="welcome-title">欢迎来到 <span class="gradient-text">Spatial AI Companion</span></h1>
-            <p class="welcome-subtitle">你的空间智能伙伴，让 AI 理解"什么空间适合此刻的你"</p>
+            <h1 class="welcome-title"><span class="gradient-text">Spatial AI Companion</span></h1>
+            <p class="welcome-subtitle">你的空间智能伙伴，理解「什么空间适合此刻的你」</p>
 
             <!-- 特色卡片 -->
             <div class="feature-cards">
@@ -56,7 +59,7 @@
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon icon-brain">
-                        <i class="fas fa-brain"></i>
+                        <i class="fas fa-user-astronaut"></i>
                     </div>
                     <h3>个性化推荐</h3>
                     <p>根据你的兴趣、体力、心情，匹配最适合的空间</p>
@@ -66,7 +69,7 @@
                         <i class="fas fa-route"></i>
                     </div>
                     <h3>可解释推荐</h3>
-                    <p>不只推荐"去哪"，还告诉你"为什么"和"注意什么"</p>
+                    <p>不只推荐「去哪」，还告诉你「为什么」和「注意什么」</p>
                 </div>
             </div>
 

@@ -48,7 +48,8 @@ function goToScreen(name) {
             return;
         }
         userProfile.gender = gender.value;
-        userProfile.age = parseInt(ageSlider.value);
+        userProfile.age = parseInt(ageSlider.value, 10);
+        userProfile.activities = [];
         document.querySelectorAll('.activity-chips input:checked').forEach(c => {
             userProfile.activities.push(c.value);
         });

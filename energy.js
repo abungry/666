@@ -7,8 +7,8 @@
 /* ---------------- 数据定义 ---------------- */
 const ENERGY_TYPES = {
     high: { label: '高精力', char: '🦸', hearts: 16, desc: '暴走型选手', grad: 'linear-gradient(135deg,#f97316,#ec4899)', shadow: '#f9731688' },
-    mid:  { label: '中精力', char: '🧗', hearts: 12, desc: '张弛有度',   grad: 'linear-gradient(135deg,#8b5cf6,#6366f1)', shadow: '#8b5cf688' },
-    low:  { label: '低精力', char: '🧘', hearts: 8,  desc: '节能养生',   grad: 'linear-gradient(135deg,#06b6d4,#10b981)', shadow: '#06b6d488' }
+    mid:  { label: '中精力', char: '🧗', hearts: 12, desc: '张弛有度',   grad: 'linear-gradient(135deg,#c45c26,#c45c26)', shadow: '#c45c2688' },
+    low:  { label: '低精力', char: '🧘', hearts: 8,  desc: '节能养生',   grad: 'linear-gradient(135deg,#8a5a3a,#c45c26)', shadow: '#8a5a3a88' }
 };
 
 const TYPE_STYLE = {
@@ -83,7 +83,7 @@ const ENERGY_ROUTES = [
         id: 'chill', name: '轻松休闲线', emoji: '🌿',
         sub: '玉渊潭 · 紫竹院 · 国图慢游', dur: '约 7.5 小时', km: '约 8 km',
         intensity: '中', tag: '张弛有度慢游',
-        rcGrad: 'linear-gradient(135deg,#10b981,#22d3ee)', rcGlow: '#10b98177',
+        rcGrad: 'linear-gradient(135deg,#c45c26,#e07a3d)', rcGlow: '#c45c2677',
         stops: [
             { type: 'park',  name: '玉渊潭公园',            dur: 100, cost: 3, desc: '环湖步行道走一圈，湖边长椅发呆' },
             { type: 'cafe',  name: '樱花咖啡·湖畔店',       dur: 60,  cost: 1, rec: 2, desc: '一杯拿铁，看云飘过湖面' },
@@ -140,7 +140,7 @@ const ENERGY_ROUTES = [
         id: 'nature', name: '自然野趣线', emoji: '🌳',
         sub: '奥森 · 鸟巢 · 朝阳公园 · 亮马河', dur: '约 9 小时', km: '约 11 km',
         intensity: '低', tag: '城市绿肺吸氧',
-        rcGrad: 'linear-gradient(135deg,#10b981,#fbbf24)', rcGlow: '#10b98177',
+        rcGrad: 'linear-gradient(135deg,#8a5a3a,#e07a3d)', rcGlow: '#8a5a3a77',
         stops: [
             { type: 'park',  name: '奥林匹克森林公园',     dur: 120, cost: 3, desc: '城市绿肺，南园环湖快走',
               choices: [
@@ -448,7 +448,7 @@ function epUpdateCustomPanel() {
     const totalRec = stops.reduce((a, s) => a + (s.rec || 0), 0);
     // 赶路消耗：起点→各站逐段累计（坐标映射与出发后画布一致）
     let walkTotal = 0;
-    let from = [4, 88];
+    let from = [7, 88];
     const legWalks = stops.map(p => {
         const w = epWalkCost(from, [8 + p.mapX * 0.84, 10 + p.mapY * 0.76]);
         from = [8 + p.mapX * 0.84, 10 + p.mapY * 0.76];
@@ -464,7 +464,7 @@ function epUpdateCustomPanel() {
     netEl.textContent = (netCost >= 0 ? '-' : '+') + Math.abs(netCost) + '💗';
     // 与当前输入的精力上限对比，超了变红提醒
     const avail = parseInt(document.getElementById('epHeartsInput')?.value) || 12;
-    netEl.style.color = netCost > avail ? '#fca5a5' : '#86efac';
+    netEl.style.color = netCost > avail ? '#fca5a5' : '#f0c19a';
 
     // 已选列表
     const sel = document.getElementById('cmSelected');
@@ -518,7 +518,7 @@ function epStartCustomTrip() {
     const badge = document.getElementById('epLevelBadge');
     badge.innerHTML = `${t.char} ${t.label} · ${n}💗 · 自定义`;
     badge.style.display = 'flex';
-    document.getElementById('epHhChar').textContent = t.char;
+    document.getElementById('epHhChar').innerHTML = epMascotSvg('mini');
     document.getElementById('epHhLabel').textContent = t.label + ' · 我的精力';
 
     epRenderHearts('init');
@@ -599,7 +599,7 @@ function epStartTrip() {
     const badge = document.getElementById('epLevelBadge');
     badge.innerHTML = `${t.char} ${t.label} · ${n}💗`;
     badge.style.display = 'flex';
-    document.getElementById('epHhChar').textContent = t.char;
+    document.getElementById('epHhChar').innerHTML = epMascotSvg('mini');
     document.getElementById('epHhLabel').textContent = t.label + ' · 我的精力';
 
     epRenderHearts('init');
@@ -633,8 +633,8 @@ function epRenderCanvas() {
     const pts = EP.xy;
     const stops = EP.stops;
 
-    // 虚拟起点 P0（画布左下角），派蒙从这里出发
-    const p0 = [4, 88];
+    // 虚拟起点 P0（画布左下角），小途从这里出发
+    const p0 = [7, 88];
     EP.origin = p0;
 
     // SVG：出发段 + 各站段路径 + 渐变定义（每段双层：底层柔光 + 上层虚线轨迹）
@@ -648,7 +648,7 @@ function epRenderCanvas() {
     }
     const svg = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs><linearGradient id="eGradStroke" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0%" stop-color="#ec4899"/><stop offset="50%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#22d3ee"/>
+            <stop offset="0%" stop-color="#e07a3d"/><stop offset="50%" stop-color="#e8c4a8"/><stop offset="100%" stop-color="#f0c19a"/>
         </linearGradient></defs>${segs}</svg>`;
 
     // 场景装饰层：星月 / 云 / 飞鸟 / 远山 / 公路汽车 / 花草 / 蝴蝶落叶微风
@@ -663,7 +663,7 @@ function epRenderCanvas() {
         <div class="rc-bird b1"><svg viewBox="0 0 40 14"><path d="M2 10 Q10 2 20 9 Q30 2 38 10" fill="none" stroke="#ffffffc4" stroke-width="2.6" stroke-linecap="round"/></svg></div>
         <div class="rc-bird b2"><svg viewBox="0 0 40 14"><path d="M2 10 Q10 2 20 9 Q30 2 38 10" fill="none" stroke="#a5b4fcc0" stroke-width="2.2" stroke-linecap="round"/></svg></div>
         <svg class="rc-mountains" viewBox="0 0 100 22" preserveAspectRatio="none">
-            <path d="M0 22 L0 17 Q13 13 26 16 Q40 11.5 52 15.5 Q65 12.5 78 16 Q90 13.5 100 15.5 L100 22 Z" fill="rgba(124,131,255,.12)"/>
+            <path d="M0 22 L0 17 Q13 13 26 16 Q40 11.5 52 15.5 Q65 12.5 78 16 Q90 13.5 100 15.5 L100 22 Z" fill="rgba(224,122,61,.10)"/>
             <path d="M0 22 L0 19 Q22 16 42 18.5 Q64 15.5 100 18 L100 22 Z" fill="rgba(34,211,238,.07)"/>
         </svg>
         <div class="rc-hill" style="left:-12%;bottom:-34px;width:58%;height:96px"></div>
@@ -691,7 +691,7 @@ function epRenderCanvas() {
     // 起点牌
     const start = `<div class="trip-origin${EP.leftStart ? '' : ' at'}" id="epOrigin" style="left:${p0[0]}%;top:${p0[1]}%">
         <div class="to-badge">起</div>
-        <div class="to-label">北师大出发</div>
+        <div class="to-label">小途出发</div>
     </div>`;
 
     // 站点（可点击查看详情）
@@ -700,7 +700,7 @@ function epRenderCanvas() {
         const st = TYPE_STYLE[s.type];
         const costTag = s.rec ? `<span class="stop-cost rec">+${s.rec}💗</span>` : `<span class="stop-cost">-${s.cost}💗</span>`;
         nodes += `<div class="stop-node" id="epStop${i}" style="left:${pts[i][0]}%;top:${pts[i][1]}%;--sc:${st.grad};--sc-glow:${st.glow};--sc-ring:${st.ring};--sc-ring2:${st.ring2}" onclick="epShowStopDetail(${i})" title="${s.name} · 点击查看详情">
-            <div class="stop-bubble"><img class="stop-emoji" src="${st.img}" alt="${s.name}"></div>${costTag}
+            <div class="stop-bubble"><img class="stop-emoji" src="${st.img}" alt="${s.name}"><span class="stop-idx">${i + 1}</span></div>${costTag}
         </div>`;
     });
 
@@ -733,70 +733,79 @@ function epRenderCanvas() {
     });
     const branchSvg = `<svg class="rc-branch-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${branchPaths}</svg>`;
 
-    // 小人（贴图优先：若项目根目录存在 paimon.png 则自动替换为贴纸小人，否则用 SVG 备用小人）
-    // 小人位置：未出发在起点 P0，已出发在「刚到达的站」pts[EP.idx-1]（绝不能用 pts[EP.idx]，否则会瞬移到下一站）
+    // 小途位置：未出发在起点 P0，已出发在「刚到达的站」pts[EP.idx-1]（绝不能用 pts[EP.idx]，否则会瞬移到下一站）
     const atOrigin = EP.idx === 0 && !EP.leftStart;
     const wpos = atOrigin ? p0 : (pts[Math.max(0, EP.idx - 1)] || p0);
     const walker = `<div class="walker" id="epWalker" style="left:${wpos[0]}%;top:${wpos[1]}%">
         <div class="w-aura"></div>
-        <div class="walker-body">
-            <svg class="w-svg" viewBox="0 0 80 104">
-            <ellipse cx="40" cy="99" rx="17" ry="4.2" fill="rgba(0,0,0,.28)"/>
-            <g class="ws-leg l1"><rect x="28" y="76" width="10" height="22" rx="5" fill="#f5b98e" stroke="#fff" stroke-width="2.6"/><rect x="26" y="92" width="14" height="8" rx="4" fill="#f97316" stroke="#fff" stroke-width="2.2"/></g>
-            <g class="ws-leg l2"><rect x="42" y="76" width="10" height="22" rx="5" fill="#f5b98e" stroke="#fff" stroke-width="2.6"/><rect x="40" y="92" width="14" height="8" rx="4" fill="#f97316" stroke="#fff" stroke-width="2.2"/></g>
-            <g class="ws-arm l2"><rect x="52" y="55" width="8" height="19" rx="4" fill="#6d76f2" stroke="#fff" stroke-width="2.4"/></g>
-            <rect x="13" y="56" width="15" height="21" rx="6.5" fill="#fb923c" stroke="#fff" stroke-width="2.6"/>
-            <rect x="16" y="61" width="9" height="4" rx="2" fill="#ffffff90"/>
-            <rect x="25" y="53" width="30" height="28" rx="11" fill="url(#wBodyGrad)" stroke="#fff" stroke-width="2.6"/>
-            <g class="ws-arm l1"><rect x="20" y="55" width="8" height="19" rx="4" fill="#6d76f2" stroke="#fff" stroke-width="2.4"/></g>
-            <circle cx="40" cy="31" r="23" fill="#ffe3cf" stroke="#fff" stroke-width="2.6"/>
-            <path d="M17.5 28 Q19 7 40 7 Q61 7 62.5 28 Q54 15.5 40 15.5 Q26 15.5 17.5 28 Z" fill="#6b4f3a"/>
-            <g class="ws-hat"><ellipse cx="34" cy="10" rx="17" ry="7.5" fill="#fbbf24" stroke="#fff" stroke-width="2.4"/><circle cx="34" cy="4.5" r="3" fill="#f59e0b" stroke="#fff" stroke-width="1.8"/></g>
-            <g class="ws-eye"><circle cx="31.5" cy="33" r="4" fill="#3d2e63"/><circle cx="33" cy="31.5" r="1.4" fill="#fff"/><circle cx="30" cy="34.8" r=".8" fill="#fff"/></g>
-            <g class="ws-eye"><circle cx="48.5" cy="33" r="4" fill="#3d2e63"/><circle cx="50" cy="31.5" r="1.4" fill="#fff"/><circle cx="47" cy="34.8" r=".8" fill="#fff"/></g>
-            <ellipse cx="24.5" cy="39.5" rx="3.8" ry="2.3" fill="#fb718599"/>
-            <ellipse cx="55.5" cy="39.5" rx="3.8" ry="2.3" fill="#fb718599"/>
-            <path class="ws-smile" d="M35.5 41.5 Q40 46 44.5 41.5" stroke="#b06553" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <defs><linearGradient id="wBodyGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#7c83ff"/><stop offset="100%" stop-color="#5b63f5"/>
-            </linearGradient></defs>
-            </svg>
-        </div>
+        <div class="w-dust"><span></span><span></span><span></span></div>
+        <div class="walker-body">${epMascotSvg()}</div>
     </div>`;
 
     canvas.innerHTML = decor + svg + branchSvg + start + nodes + branchNodes + walker;
-    epApplyWalkerSkin(document.querySelector('#epWalker .walker-body'));
     epMarkStops();
 }
 
-/* ---------------- 小人换肤：分层贴纸 > 整张抠图 > SVG ---------------- */
-function epApplyWalkerSkin(body) {
-    if (!body) return;
-    const tryLoad = (src, cb) => { const im = new Image(); im.onload = () => cb(true); im.onerror = () => cb(false); im.src = src; };
-    const useParts = () => {
-        body.insertAdjacentHTML('beforeend',
-            '<img class="w-part w-stick-head" src="paimon_head.png" alt=""><img class="w-part w-stick-body" src="paimon_body.png" alt="">');
-        body.classList.add('sticker');
-        const svg = body.querySelector('.w-svg'); if (svg) svg.remove();
+/* ---------------- 原创角色「小途」：薄荷色麻薯探险家 ---------------- */
+function epMascotSvg(extraClass = '') {
+    const gid = extraClass === 'mini' ? 'tuBodyMini' : 'tuBody';
+    return `<svg class="w-svg ${extraClass}" viewBox="0 0 80 100" aria-label="小途">
+        <defs>
+            <linearGradient id="${gid}" x1="0.2" y1="0" x2="0.8" y2="1">
+                <stop offset="0%" stop-color="#f8e2c8"/><stop offset="55%" stop-color="#e07a3d"/><stop offset="100%" stop-color="#9a4a1c"/>
+            </linearGradient>
+        </defs>
+        <ellipse class="ws-shadow" cx="40" cy="95" rx="18" ry="3.6" fill="rgba(0,0,0,.3)"/>
+        <g class="ws-leg l1"><rect x="27" y="76" width="11" height="17" rx="5.5" fill="#9a4a1c" stroke="#fff" stroke-width="2.4"/></g>
+        <g class="ws-leg l2"><rect x="42" y="76" width="11" height="17" rx="5.5" fill="#9a4a1c" stroke="#fff" stroke-width="2.4"/></g>
+        <g class="ws-arm l1"><rect x="7" y="50" width="10" height="18" rx="5" fill="#e07a3d" stroke="#fff" stroke-width="2.4"/></g>
+        <g class="ws-arm l2"><rect x="63" y="50" width="10" height="18" rx="5" fill="#e07a3d" stroke="#fff" stroke-width="2.4"/></g>
+        <path d="M40 16 C61 16 71 32 71 51 C71 70 58 84 40 84 C22 84 9 70 9 51 C9 32 19 16 40 16 Z" fill="url(#${gid})" stroke="#fff" stroke-width="2.6"/>
+        <ellipse cx="40" cy="66" rx="17" ry="12" fill="#fde7d4" opacity=".55"/>
+        <ellipse cx="26" cy="28" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-25 26 28)"/>
+        <path d="M17 57 Q40 67 63 57 L63 62.5 Q40 72.5 17 62.5 Z" fill="#f0c674" stroke="#fff" stroke-width="1.6"/>
+        <path d="M51 64 L57 76 L50.5 73.5 Z" fill="#f59e0b" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+        <g class="ws-hat">
+            <path d="M40 17 Q40 10 42 5" stroke="#9a4a1c" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            <path d="M42 6 C47 0 55 1 57 5 C52 10 46 10 42 6 Z" fill="#f6e7d4" stroke="#fff" stroke-width="1.4"/>
+            <path d="M40.5 9 C36 5 30 5.5 28.5 8.5 C32.5 12 37 12 40.5 9 Z" fill="#e8c4a8" stroke="#fff" stroke-width="1.4"/>
+        </g>
+        <g class="ws-eye"><ellipse cx="30" cy="42" rx="4.6" ry="5.4" fill="#0b2530"/><circle cx="31.7" cy="39.8" r="1.8" fill="#fff"/><circle cx="28.6" cy="44.4" r=".9" fill="#fff"/></g>
+        <g class="ws-eye"><ellipse cx="50" cy="42" rx="4.6" ry="5.4" fill="#0b2530"/><circle cx="51.7" cy="39.8" r="1.8" fill="#fff"/><circle cx="48.6" cy="44.4" r=".9" fill="#fff"/></g>
+        <g class="ws-eye-tired" fill="none" stroke="#0b2530" stroke-width="2.4" stroke-linecap="round">
+            <path d="M25.5 43 Q30 46.5 34.5 43"/><path d="M45.5 43 Q50 46.5 54.5 43"/>
+        </g>
+        <ellipse cx="21.5" cy="50" rx="4.2" ry="2.6" fill="#fb7185" opacity=".5"/>
+        <ellipse cx="58.5" cy="50" rx="4.2" ry="2.6" fill="#fb7185" opacity=".5"/>
+        <path class="ws-smile" d="M36 49 Q40 53 44 49" stroke="#0b2530" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path class="ws-sweat" d="M66 24 C66 24 61.5 30.5 61.5 33 A4.5 4.5 0 0 0 70.5 33 C70.5 30.5 66 24 66 24 Z" fill="#f0c19a" stroke="#fff" stroke-width="1.2"/>
+    </svg>`;
+}
+
+/* 沿 SVG 路径行走：路径坐标与画布百分比一一对应（viewBox 0-100 + preserveAspectRatio none） */
+function epWalkAlong(el, path, target, dur) {
+    const finish = () => {
+        el.classList.remove('pathing');
+        el.style.left = target[0] + '%';
+        el.style.top = target[1] + '%';
     };
-    const useCut = () => {
-        tryLoad('paimon_cut.png', ok => {
-            if (!ok) { EP._skin = 'svg'; return; } // 无贴图，保留 SVG 备用小人
-            EP._skin = 'cut';
-            body.insertAdjacentHTML('beforeend', '<img class="w-img" src="paimon_cut.png" alt="">');
-            body.classList.add('sticker');
-            const svg = body.querySelector('.w-svg'); if (svg) svg.remove();
-        });
+    if (!path || typeof path.getTotalLength !== 'function') { finish(); return; }
+    const len = path.getTotalLength();
+    const ease = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+    const t0 = performance.now();
+    let lastX = path.getPointAtLength(0).x;
+    el.classList.add('pathing');
+    const step = now => {
+        const t = Math.min(1, (now - t0) / dur);
+        const p = path.getPointAtLength(len * ease(t));
+        el.style.left = p.x + '%';
+        el.style.top = p.y + '%';
+        if (Math.abs(p.x - lastX) > 0.05) el.classList.toggle('face-left', p.x < lastX);
+        lastX = p.x;
+        if (t < 1) requestAnimationFrame(step);
+        else finish();
     };
-    if (EP._skin === 'parts') return useParts();
-    if (EP._skin === 'cut')   return useCut();
-    if (EP._skin === 'svg') return; // 已确认无任何贴图
-    tryLoad('paimon_head.png', okH => {
-        if (okH) tryLoad('paimon_body.png', okB => {
-            if (okB) { EP._skin = 'parts'; useParts(); } else { useCut(); }
-        });
-        else useCut(); // 无头片再试整图，都无则 SVG
-    });
+    requestAnimationFrame(step);
 }
 
 function epMarkStops() {
@@ -807,10 +816,10 @@ function epMarkStops() {
         const el = document.getElementById('epStop' + i);
         if (!el || el.classList.contains('skipped')) return;
         el.classList.toggle('passed', i < EP.idx);
-        el.classList.toggle('current', i === EP.idx && EP.leftStart);
+        el.classList.toggle('current', i === EP.idx);
         el.classList.toggle('at', i === walkerHere);
     });
-    // 出发段点亮；派蒙未离开时圆牌藏在脚下，只显示文字标签
+    // 出发段点亮；小途未离开时圆牌藏在脚下，只显示文字标签
     const originEl = document.getElementById('epOrigin');
     if (originEl) originEl.classList.toggle('at', !EP.leftStart);
     const segStart = document.getElementById('epSegStart');
@@ -881,7 +890,7 @@ function epShowStopDetail(i) {
                 <div class="sd-rows">
                     <div class="sd-row"><i class="sd-ri fas fa-clock" style="background:linear-gradient(135deg,#7c83ff,#5b63f5)"></i><span class="sd-rl">建议停留时间</span><span class="sd-rv">${Math.round(s.dur / 60 * 10) / 10} 小时</span></div>
                     <div class="sd-row"><i class="sd-ri fas fa-heart-broken" style="background:linear-gradient(135deg,#fb7185,#f43f5e)"></i><span class="sd-rl">体力消耗</span><span class="sd-rv cost">${s.cost > 0 ? '-' + s.cost + ' 💗' : '0 💗 不耗体力'}</span></div>
-                    ${i >= EP.idx && i < EP.stops.length ? (() => { const fp = i === 0 ? (EP.origin || [4, 88]) : EP.xy[i - 1]; return `<div class="sd-row"><i class="sd-ri fas fa-person-walking" style="background:linear-gradient(135deg,#22d3ee,#3b82f6)"></i><span class="sd-rl">从上一站赶路</span><span class="sd-rv cost">-${epWalkCost(fp, EP.xy[i])} 💗</span></div>`; })() : ''}
+                    ${i >= EP.idx && i < EP.stops.length ? (() => { const fp = i === 0 ? (EP.origin || [7, 88]) : EP.xy[i - 1]; return `<div class="sd-row"><i class="sd-ri fas fa-person-walking" style="background:linear-gradient(135deg,#22d3ee,#3b82f6)"></i><span class="sd-rl">从上一站赶路</span><span class="sd-rv cost">-${epWalkCost(fp, EP.xy[i])} 💗</span></div>`; })() : ''}
                     <div class="sd-row"><i class="sd-ri fas fa-heart-pulse" style="background:linear-gradient(135deg,#34d399,#10b981)"></i><span class="sd-rl">体力恢复</span><span class="sd-rv rec">${s.rec ? '+' + s.rec + ' 💗' : '— 无恢复'}</span></div>
                     <div class="sd-row"><i class="sd-ri fas fa-location-dot" style="background:linear-gradient(135deg,#f59e0b,#d97706)"></i><span class="sd-rl">路线位置</span><span class="sd-rv">第 ${i + 1} 站 / 共 ${EP.stops.length} 站</span></div>
                 </div>
@@ -907,30 +916,41 @@ function epRenderNowStop() {
     const typeLabel = { park: '公园绿地', sight: '景点', food: '餐饮', cafe: '咖啡歇脚', hotel: '住宿休整' }[s.type];
     const totalDur = EP.stops.slice(0, EP.idx + 1).reduce((a, b) => a + b.dur, 0);
     // 赶路消耗：从当前位置走到该站
-    const fromPos = EP.idx === 0 ? (EP.origin || [4, 88]) : EP.xy[EP.idx - 1];
+    const fromPos = EP.idx === 0 ? (EP.origin || [7, 88]) : EP.xy[EP.idx - 1];
     const walk = epWalkCost(fromPos, EP.xy[EP.idx]);
 
     box.style.setProperty('--sc', st.grad);
     box.style.setProperty('--sc-glow', st.glow);
+    const hours = m => Math.round(m / 60 * 10) / 10;
+    const heartTile = s.rec
+        ? `<div class="ns-stat rec"><i class="fas fa-heart-pulse"></i><b>+${s.rec}</b><span>休息回血</span></div>`
+        : `<div class="ns-stat cost"><i class="fas fa-heart"></i><b>-${s.cost || 0}</b><span>打卡消耗</span></div>`;
     box.innerHTML = `
         <div class="ns-head">
             <div class="ns-ico"><img src="${st.img}" alt=""></div>
             <div class="ns-info">
+                <div class="ns-kicker">下一站 · 第 ${EP.idx + 1}/${EP.stops.length} 站 · ${typeLabel}</div>
                 <h4>${s.name}</h4>
                 <p>${s.desc}</p>
             </div>
         </div>
         <div class="ns-stats">
-            <span class="ns-stat"><i class="fas fa-clock"></i> 建议停留 ${Math.round(s.dur / 60 * 10) / 10}h</span>
-            <span class="ns-stat"><i class="fas fa-person-walking"></i> 赶路 ${walk}💗</span>
-            ${s.cost ? `<span class="ns-stat cost"><i class="fas fa-heart"></i> 打卡 ${s.cost}💗</span>` : ''}
-            ${s.rec ? `<span class="ns-stat rec"><i class="fas fa-heart-pulse"></i> 恢复 +${s.rec}💗</span>` : ''}
-            <span class="ns-stat"><i class="fas fa-flag-checkered"></i> 行程过半约 ${Math.round(totalDur / 60 * 10) / 10}h</span>
+            <div class="ns-stat"><i class="fas fa-clock"></i><b>${hours(s.dur)}h</b><span>建议停留</span></div>
+            <div class="ns-stat"><i class="fas fa-person-walking"></i><b>-${walk}</b><span>赶路消耗</span></div>
+            ${heartTile}
+            <div class="ns-stat"><i class="fas fa-hourglass-half"></i><b>${hours(totalDur)}h</b><span>累计用时</span></div>
         </div>`;
 
+    const need = walk + (s.cost || 0);
     acts.innerHTML = `
-        <button class="act-btn go" onclick="epVisitStop()"><i class="fas fa-person-walking"></i><span>打卡这一站</span><small>赶路 -${walk}💗 · 打卡 -${s.cost || 0}💗</small></button>
-        <button class="act-btn replan" onclick="epReplan()"><i class="fas fa-wand-magic-sparkles"></i><span>重新规划</span><small>砍掉太累的</small></button>`;
+        <button class="act-btn go" onclick="epVisitStop()">
+            <span class="ab-ico"><i class="fas fa-person-walking"></i></span>
+            <span class="ab-text"><span>打卡这一站</span><small>共消耗 ${need}💗 · 赶路 ${walk} + 打卡 ${s.cost || 0}</small></span>
+            <i class="fas fa-arrow-right ab-go"></i>
+        </button>
+        <button class="act-btn replan" onclick="epReplan()" title="砍掉太累的站点">
+            <i class="fas fa-wand-magic-sparkles"></i><span>重新规划</span>
+        </button>`;
 }
 
 /* ---------------- 到站 ---------------- */
@@ -964,7 +984,7 @@ function epVisitStop() {
     if (!s) return;
 
     // 赶路消耗：从当前位置走到该站也要花体力
-    const fromPos = EP.idx === 0 ? (EP.origin || [4, 88]) : EP.xy[EP.idx - 1];
+    const fromPos = EP.idx === 0 ? (EP.origin || [7, 88]) : EP.xy[EP.idx - 1];
     const walk = epWalkCost(fromPos, EP.xy[EP.idx]);
     if (EP.hearts < s.cost + walk) {
         epToast('爱心不够啦！先休息或重新规划吧 🥺');
@@ -976,9 +996,8 @@ function epVisitStop() {
     const w = document.getElementById('epWalker');
     w.classList.add('walking');
 
-    // 小人走向目标站
-    w.style.left = EP.xy[EP.idx][0] + '%';
-    w.style.top = EP.xy[EP.idx][1] + '%';
+    const seg = document.getElementById(EP.idx === 0 ? 'epSegStart' : 'epSeg' + (EP.idx - 1));
+    epWalkAlong(w, seg, EP.xy[EP.idx], 1150);
 
     setTimeout(() => {
         w.classList.remove('walking');
@@ -1021,7 +1040,7 @@ function epEvaluate(initial) {
 
     const t = ENERGY_TYPES[EP.typeKey];
     // 下一站需求 = 赶路 + 打卡
-    const fromPos = EP.idx === 0 ? (EP.origin || [4, 88]) : EP.xy[EP.idx - 1];
+    const fromPos = EP.idx === 0 ? (EP.origin || [7, 88]) : EP.xy[EP.idx - 1];
     const walkNext = epWalkCost(fromPos, EP.xy[EP.idx]);
     const need = (next.cost || 0) + walkNext;
     let html = '';
@@ -1063,7 +1082,7 @@ function epEvaluate(initial) {
                 <p>剩余 <b>${EP.hearts}💗</b>，足够覆盖「${next.name}」（需 ${need}💗，含赶路）。按当前节奏走完全程没问题，冲！</p></div>`;
         } else {
             const tripTotal = (() => {
-                let c = 0, from = EP.origin || [4, 88];
+                let c = 0, from = EP.origin || [7, 88];
                 for (let i = 0; i < EP.stops.length; i++) {
                     c += epWalkCost(from, EP.xy[i]) + (EP.stops[i].cost || 0) - (EP.stops[i].rec || 0);
                     from = EP.xy[i];
@@ -1119,7 +1138,7 @@ function epReplan() {
     // 剩余总耗 = 赶路 + 打卡（按保留站点顺序逐段累计，砍站后相邻段自动合并）
     let cut = [];
     const totalCost = () => {
-        let c = 0, from = EP.leftStart ? EP.xy[EP.idx - 1] : (EP.origin || [4, 88]);
+        let c = 0, from = EP.leftStart ? EP.xy[EP.idx - 1] : (EP.origin || [7, 88]);
         for (let i = EP.idx; i < EP.stops.length; i++) {
             if (cut.includes(i)) continue;
             c += epWalkCost(from, EP.xy[i]) + (EP.stops[i].cost || 0);
@@ -1183,7 +1202,7 @@ function epFinish(early) {
         <div class="finish-stats">
             <div class="fs-card"><b>${Math.round(totalMin / 60 * 10) / 10}h</b><span>行程总时长</span></div>
             <div class="fs-card"><b style="color:#fda4af">${used}💗</b><span>精力消耗</span></div>
-            <div class="fs-card"><b style="color:#86efac">${EP.hearts}💗</b><span>剩余电量</span></div>
+            <div class="fs-card"><b style="color:#f0c19a">${EP.hearts}💗</b><span>剩余电量</span></div>
         </div>
         <div class="finish-medal"><h4>旅途称号 · ${medal}</h4><p>${medalDesc}</p></div>
         <button class="e-cta" onclick="epReset();epShowStep(1)"><span>再来一次</span><i class="fas fa-rotate-right"></i></button>`;

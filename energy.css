@@ -1,90 +1,90 @@
-/* 作者：周梓润 */
+/* 浣滆€咃細鍛ㄦ娑?*/
 /* ============================================================
-   Spatial AI Companion - 精力规划师 (Energy Planner)
-   小人 + 爱心精力量化 · 插画路线 · 智能建议
+   Spatial AI Companion - 绮惧姏瑙勫垝甯?(Energy Planner)
+   灏忎汉 + 鐖卞績绮惧姏閲忓寲 路 鎻掔敾璺嚎 路 鏅鸿兘寤鸿
    ============================================================ */
 
-/* ---------- 全屏浮层 ---------- */
+/* ---------- 鍏ㄥ睆娴眰 ---------- */
 .energy-overlay {
     position: fixed; inset: 0; z-index: 2000;
     display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #1a1740 0%, #23205e 45%, #14304d 100%);
+    background: linear-gradient(165deg, #050b14 0%, #0c1a2c 42%, #081420 100%);
     opacity: 0; pointer-events: none; transition: opacity .35s ease;
-    font-family: 'Plus Jakarta Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: 'Sora', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 .energy-overlay.open { opacity: 1; pointer-events: auto; }
 
-/* 浮层背景装饰 */
+/* 娴眰鑳屾櫙瑁呴グ */
 .energy-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.energy-bg .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .45; animation: ebFloat 9s ease-in-out infinite; }
-.energy-bg .b1 { width: 320px; height: 320px; background: #7c83ff; top: -80px; left: -60px; }
-.energy-bg .b2 { width: 260px; height: 260px; background: #ec4899; bottom: -60px; right: -40px; animation-delay: -3s; }
-.energy-bg .b3 { width: 220px; height: 220px; background: #22d3ee; top: 40%; left: 60%; animation-delay: -6s; opacity: .3; }
+.energy-bg .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .38; animation: ebFloat 9s ease-in-out infinite; }
+.energy-bg .b1 { width: 320px; height: 320px; background: #e07a3d; top: -80px; left: -60px; }
+.energy-bg .b2 { width: 260px; height: 260px; background: #e8c4a8; bottom: -60px; right: -40px; animation-delay: -3s; }
+.energy-bg .b3 { width: 220px; height: 220px; background: #f0c19a; top: 40%; left: 60%; animation-delay: -6s; opacity: .28; }
 @keyframes ebFloat { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(30px,-24px) scale(1.08);} }
 .energy-bg .e-stars { position: absolute; inset: 0;
     background-image: radial-gradient(1.5px 1.5px at 12% 22%, #fff8 40%, transparent 41%),
         radial-gradient(1px 1px at 78% 12%, #fff6 40%, transparent 41%),
         radial-gradient(1.6px 1.6px at 88% 68%, #fff5 40%, transparent 41%),
         radial-gradient(1px 1px at 34% 84%, #fff7 40%, transparent 41%),
-        radial-gradient(1.2px 1.2px at 55% 45%, #fff4 40%, transparent 41%);
+        radial-gradient(1.2px 1.2px at 55% 45%, #f0c19a88 40%, transparent 41%);
     animation: eTwinkle 4s ease-in-out infinite alternate; }
 @keyframes eTwinkle { from { opacity:.5 } to { opacity:1 } }
 
-/* 主面板 */
+/* 涓婚潰鏉?*/
 .energy-panel {
     position: relative; width: min(560px, 100%); height: 100%;
     display: flex; flex-direction: column; overflow: hidden;
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(148,197,220,0.14);
     backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
 }
 @media (min-width: 600px) {
-    .energy-panel { height: min(860px, 94vh); border-radius: 28px; box-shadow: 0 30px 90px rgba(0,0,0,.55); }
+    .energy-panel { height: min(860px, 94vh); border-radius: 22px; box-shadow: 0 28px 80px rgba(0,0,0,.5); }
 }
 
-/* 顶栏 */
+/* 椤舵爮 */
 .e-top { display: flex; align-items: center; gap: 12px; padding: 16px 18px 12px; flex-shrink: 0; }
 .e-back {
-    width: 38px; height: 38px; border-radius: 13px; border: 1px solid rgba(255,255,255,.16);
-    background: rgba(255,255,255,.08); color: #fff; cursor: pointer; font-size: 15px;
-    display: flex; align-items: center; justify-content: center; transition: all .2s;
+    width: 38px; height: 38px; border-radius: 11px; border: 1px solid rgba(148,197,220,.14);
+    background: rgba(255,255,255,.05); color: #fff; cursor: pointer; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; transition: all .22s cubic-bezier(.22,1,.36,1);
 }
-.e-back:hover { background: rgba(255,255,255,.16); transform: translateX(-2px); }
+.e-back:hover { background: rgba(45,212,191,.18); transform: translateX(-2px); color: #f0c19a; }
 .e-top-title { flex: 1; }
 .e-top-title h2 {
     margin: 0; font-size: 17px; font-weight: 800; color: #fff; letter-spacing: .5px;
-    background: linear-gradient(90deg, #fda4af, #f0abfc, #a5b4fc);
+    background: linear-gradient(90deg, #f0c19a, #e8c4a8, #f0c19a);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 .e-top-title p { margin: 2px 0 0; font-size: 11px; color: #ffffff99; }
 .e-level-badge {
     display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px;
-    background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.09); border: 1px solid rgba(148,197,220,.15);
     color: #fff; font-size: 12px; font-weight: 700;
 }
 .e-steps { display: flex; gap: 6px; padding: 0 18px 10px; flex-shrink: 0; }
 .e-step-dot { height: 4px; flex: 1; border-radius: 99px; background: rgba(255,255,255,.12); transition: all .4s; }
-.e-step-dot.on { background: linear-gradient(90deg, #ec4899, #8b5cf6); box-shadow: 0 0 10px #ec489988; }
+.e-step-dot.on { background: linear-gradient(90deg, #e07a3d, #e8c4a8); }
 
-/* 步骤容器 */
+/* 姝ラ瀹瑰櫒 */
 .e-body { flex: 1; overflow-y: auto; padding: 6px 18px 26px; scrollbar-width: none; }
 .e-body::-webkit-scrollbar { display: none; }
 .e-screen { display: none; animation: eIn .45s cubic-bezier(.22,1,.36,1); }
 .e-screen.active { display: block; }
 @keyframes eIn { from { opacity: 0; transform: translateY(18px) scale(.98);} to { opacity: 1; transform: none;} }
 
-/* ============ Step1 精力档案 ============ */
+/* ============ Step1 绮惧姏妗ｆ ============ */
 .e-hero { text-align: center; padding: 14px 0 18px; }
-.e-hero .big-emoji { font-size: 52px; display: inline-block; animation: eBob 3s ease-in-out infinite; filter: drop-shadow(0 8px 22px #ec489955); }
+.e-hero .big-emoji { font-size: 52px; display: inline-block; animation: eBob 3s ease-in-out infinite; filter: drop-shadow(0 8px 22px #c45c2655); }
 @keyframes eBob { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-10px);} }
 .e-hero h3 { margin: 10px 0 4px; color: #fff; font-size: 20px; font-weight: 800; }
 .e-hero p { margin: 0; color: #ffffffa8; font-size: 12.5px; line-height: 1.6; }
 
 .energy-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .energy-type-card {
-    position: relative; border-radius: 22px; padding: 18px 10px 14px; cursor: pointer; text-align: center;
-    background: rgba(255,255,255,.055); border: 1.5px solid rgba(255,255,255,.12);
-    transition: all .25s cubic-bezier(.22,1,.36,1); overflow: hidden;
+    position: relative; border-radius: 16px; padding: 18px 10px 14px; cursor: pointer; text-align: center;
+    background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.1);
+    transition: all .28s cubic-bezier(.22,1,.36,1); overflow: hidden;
 }
 .energy-type-card::before {
     content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .3s;
@@ -102,16 +102,16 @@
 .et-hearts i { text-shadow: 0 0 8px #f9a8d4; }
 .et-desc { margin-top: 3px; color: #ffffffb0; font-size: 10.5px; }
 
-/* 手动输入精力值 */
+/* 鎵嬪姩杈撳叆绮惧姏鍊?*/
 .e-custom-input {
     margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 12px;
     padding: 14px; border-radius: 18px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.14);
 }
 .e-ci-btn {
-    width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
-    background: linear-gradient(135deg,#8b5cf6,#ec4899); color: #fff; font-size: 22px; font-weight: 800;
+    width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer;
+    background: linear-gradient(135deg,#c45c26,#c45c26); color: #fff; font-size: 22px; font-weight: 800;
     display: flex; align-items: center; justify-content: center; line-height: 1;
-    box-shadow: 0 4px 12px rgba(139,92,246,.4); transition: transform .15s;
+    box-shadow: 0 4px 12px rgba(14,165,233,.32); transition: transform .15s;
 }
 .e-ci-btn:hover { transform: scale(1.1); }
 .e-ci-btn:active { transform: scale(.92); }
@@ -123,7 +123,7 @@
 }
 #epHeartsInput::-webkit-outer-spin-button,
 #epHeartsInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-#epHeartsInput:focus { border-color: #ec4899; box-shadow: 0 0 0 3px rgba(236,72,153,.25); }
+#epHeartsInput:focus { border-color: #c45c26; box-shadow: 0 0 0 3px rgba(196, 92, 38,.25); }
 .e-ci-unit { font-size: 24px; }
 
 .e-tip-bar {
@@ -134,19 +134,19 @@
 
 .e-cta {
     display: flex; align-items: center; justify-content: center; gap: 9px;
-    width: 100%; margin-top: 18px; padding: 15px; border: none; border-radius: 18px; cursor: pointer;
-    font-size: 15px; font-weight: 800; color: #fff; font-family: inherit; letter-spacing: 1px;
-    background: linear-gradient(135deg, #ec4899, #8b5cf6 55%, #6366f1);
+    width: 100%; margin-top: 18px; padding: 15px; border: none; border-radius: 14px; cursor: pointer;
+    font-size: 15px; font-weight: 800; color: #fff; font-family: inherit; letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #c45c26, #c45c26 55%, #0284c7);
     background-size: 200% 200%; animation: eGrad 4s ease infinite;
-    box-shadow: 0 10px 30px #8b5cf666, inset 0 1px 0 #ffffff33;
-    transition: transform .15s;
+    box-shadow: 0 10px 28px rgba(14,165,233,.32), inset 0 1px 0 rgba(255,255,255,.2);
+    transition: transform .18s cubic-bezier(.22,1,.36,1);
 }
 .e-cta:hover { transform: translateY(-2px); }
 .e-cta:active { transform: scale(.97); }
 .e-cta:disabled { opacity: .4; cursor: not-allowed; animation: none; }
 @keyframes eGrad { 0%,100% { background-position: 0% 50%;} 50% { background-position: 100% 50%;} }
 
-/* ============ Step2 路线选择 ============ */
+/* ============ Step2 璺嚎閫夋嫨 ============ */
 .route-list { display: flex; flex-direction: column; gap: 14px; }
 .route-card {
     position: relative; border-radius: 22px; padding: 16px; cursor: pointer;
@@ -166,7 +166,7 @@
 }
 .route-card.selected .rc-check { background: linear-gradient(135deg,#34d399,#10b981); border-color: transparent; color: #fff; }
 
-/* 路线封面横幅（AI 生成配图） */
+/* 璺嚎灏侀潰妯箙锛圓I 鐢熸垚閰嶅浘锛?*/
 .rc-cover {
     position: relative; height: 118px; border-radius: 16px; overflow: hidden;
     margin-bottom: 13px; background: var(--rc-grad);
@@ -204,7 +204,7 @@
     padding: 4px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700;
     background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.13); color: #e6e6ff;
 }
-.rc-tag.hl { background: rgba(236,72,153,.16); border-color: rgba(236,72,153,.4); color: #fbcfe8; }
+.rc-tag.hl { background: rgba(196, 92, 38,.16); border-color: rgba(196, 92, 38,.4); color: #99f6e4; }
 .rc-chain { display: flex; align-items: center; gap: 5px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .rc-chain::-webkit-scrollbar { display: none; }
 .rc-node {
@@ -216,14 +216,14 @@
 .rc-node:hover .rc-emoji { transform: scale(1.15) rotate(-6deg); }
 .rc-link { width: 16px; height: 2px; flex-shrink: 0; border-radius: 2px; background: repeating-linear-gradient(90deg, #ffffff55 0 3px, transparent 3px 6px); }
 
-/* ============ Step3 旅程模拟 ============ */
-/* 精力条（爱心） */
+/* ============ Step3 鏃呯▼妯℃嫙 ============ */
+/* 绮惧姏鏉★紙鐖卞績锛?*/
 .hearts-block { border-radius: 22px; padding: 14px 16px 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); }
 .hearts-head { display: flex; align-items: center; justify-content: space-between; }
 .hearts-head .hh-left { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12.5px; font-weight: 700; }
-.hh-char { width: 34px; height: 34px; border-radius: 12px; background: linear-gradient(135deg,#7c83ff,#5b63f5); display: flex; align-items: center; justify-content: center; font-size: 19px; box-shadow: 0 5px 14px #7c83ff66; }
+.hh-char { width: 34px; height: 34px; border-radius: 12px; background: linear-gradient(135deg,#e07a3d,#0f766e); display: flex; align-items: center; justify-content: center; font-size: 19px; box-shadow: 0 5px 14px #e07a3d66; }
 .hearts-nums { font-size: 11.5px; color: #ffffffb0; font-weight: 600; }
-.hearts-nums b { color: #fda4af; font-size: 15px; }
+.hearts-nums b { color: #f0c19a; font-size: 15px; }
 .hearts-row { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
 .heart { font-size: 20px; line-height: 1; filter: drop-shadow(0 3px 6px #f43f5e66); transition: all .4s cubic-bezier(.34,1.56,.64,1); }
 .heart.full { color: #fb7185; animation: heartBeat 2.2s ease-in-out infinite; }
@@ -236,7 +236,7 @@
 @keyframes heartGain { 0% { transform: scale(.4);} 60% { transform: scale(1.35);} 100% { transform: scale(1);} }
 .hearts-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
 .hearts-bar { flex: 1; height: 7px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; }
-.hearts-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #fb7185, #ec4899, #c084fc); box-shadow: 0 0 12px #ec489988; transition: width .6s cubic-bezier(.22,1,.36,1); }
+.hearts-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #fb7185, #f43f5e, #f5c76b); box-shadow: 0 0 12px #fb718588; transition: width .6s cubic-bezier(.22,1,.36,1); }
 .report-btn {
     border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #e0e0ff;
     font-size: 10.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; cursor: pointer; margin-left: 10px;
@@ -244,10 +244,10 @@
 }
 .report-btn:hover { background: rgba(255,255,255,.16); }
 
-/* 上报弹层 */
+/* 涓婃姤寮瑰眰 */
 .report-pop {
     margin-top: 10px; border-radius: 16px; padding: 13px 14px; display: none;
-    background: rgba(124,131,255,.1); border: 1px dashed rgba(165,169,255,.45);
+    background: rgba(45, 212, 191,.1); border: 1px dashed rgba(165,169,255,.45);
     animation: eIn .3s ease;
 }
 .report-pop.open { display: block; }
@@ -257,20 +257,20 @@
     border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.09); color: #fff;
     border-radius: 999px; padding: 6px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s;
 }
-.rq-chip:hover { background: #7c83ff; border-color: transparent; transform: translateY(-2px); }
+.rq-chip:hover { background: #e07a3d; border-color: transparent; transform: translateY(-2px); }
 
-/* 插画路线画布 */
-.route-canvas-wrap { margin-top: 14px; border-radius: 22px; padding: 8px; background: linear-gradient(180deg, rgba(124,131,255,.10), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.12); position: relative; overflow: hidden; }
+/* 鎻掔敾璺嚎鐢诲竷 */
+.route-canvas-wrap { margin-top: 14px; border-radius: 22px; padding: 8px; background: linear-gradient(180deg, rgba(45, 212, 191,.10), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.12); position: relative; overflow: hidden; }
 .route-canvas { position: relative; width: 100%; height: 430px; }
 .route-canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
 .rc-path { fill: none; stroke: rgba(255,255,255,.30); stroke-width: 3; stroke-dasharray: 1 9; stroke-linecap: round; }
-.rc-path-glow { fill: none; stroke: #ec4899; stroke-width: 8; stroke-linecap: round; opacity: .12; filter: blur(4px); }
-.rc-path.done { stroke: url(#eGradStroke); stroke-dasharray: none; filter: drop-shadow(0 0 5px #ec4899aa); animation: pathGlow 1.6s ease infinite alternate; }
-@keyframes pathGlow { from { filter: drop-shadow(0 0 3px #ec489988);} to { filter: drop-shadow(0 0 8px #ec4899dd);} }
+.rc-path-glow { fill: none; stroke: #c45c26; stroke-width: 8; stroke-linecap: round; opacity: .12; filter: blur(4px); }
+.rc-path.done { stroke: url(#eGradStroke); stroke-dasharray: none; filter: drop-shadow(0 0 5px #c45c26aa); animation: pathGlow 1.6s ease infinite alternate; }
+@keyframes pathGlow { from { filter: drop-shadow(0 0 3px #c45c2688);} to { filter: drop-shadow(0 0 8px #c45c26dd);} }
 
-/* 场景装饰层：星月/云/飞鸟/远山/公路汽车/花草/蝴蝶/落叶/微风 */
+/* 鍦烘櫙瑁呴グ灞傦細鏄熸湀/浜?椋為笩/杩滃北/鍏矾姹借溅/鑺辫崏/铦磋澏/钀藉彾/寰 */
 .rc-decor { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-/* 月亮 */
+/* 鏈堜寒 */
 .rc-moon {
     position: absolute; top: 4.5%; right: 6%; width: 32px; height: 32px; border-radius: 50%;
     background: radial-gradient(circle at 36% 34%, #fffbe8, #fde68a 62%, #fbbf24);
@@ -283,12 +283,12 @@
     0%,100% { box-shadow: 0 0 20px 6px rgba(253,230,138,.32), 0 0 56px 16px rgba(253,230,138,.10); }
     50% { box-shadow: 0 0 28px 9px rgba(253,230,138,.45), 0 0 74px 22px rgba(253,230,138,.15); }
 }
-/* 云 */
+/* 浜?*/
 .rc-cloud { position: absolute; left: -14%; color: #ffffff2e; animation: cloudDrift linear infinite; }
 @keyframes cloudDrift { 0% { left: -14%; } 100% { left: 110%; } }
 .rc-star { position: absolute; color: #fde68a77; font-size: 13px; animation: twinkle 3s ease-in-out infinite; }
 @keyframes twinkle { 0%,100% { opacity: .25; transform: scale(.8);} 50% { opacity: 1; transform: scale(1.15);} }
-/* 飞鸟（横移+上下起伏，翅膀扇动） */
+/* 椋為笩锛堟í绉?涓婁笅璧蜂紡锛岀繀鑶€鎵囧姩锛?*/
 .rc-bird { position: absolute; width: 30px; opacity: 0; animation: birdFly 19s linear infinite; }
 .rc-bird.b1 { top: 15%; }
 .rc-bird.b2 { top: 26%; width: 20px; animation-name: birdFly2; animation-duration: 27s; animation-delay: -11s; }
@@ -313,11 +313,11 @@
     93% { opacity: .7; }
     100% { left: 108%; top: 24%; opacity: 0; }
 }
-/* 远山 + 呼吸光丘 */
+/* 杩滃北 + 鍛煎惛鍏変笜 */
 .rc-mountains { position: absolute; left: 0; right: 0; bottom: 30px; width: 100%; height: 58px; }
 .rc-hill { position: absolute; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(139,92,246,.16), transparent 70%); animation: hillBreath 6s ease-in-out infinite; }
 @keyframes hillBreath { 0%,100% { transform: scale(1); opacity:.8;} 50% { transform: scale(1.06); opacity:1;} }
-/* 微风线 */
+/* 寰绾?*/
 .rc-wind {
     position: absolute; top: 42%; height: 2px; width: 84px; border-radius: 2px; opacity: 0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
@@ -325,7 +325,7 @@
 }
 .rc-wind.w2 { top: 57%; width: 60px; animation-duration: 13.5s; animation-delay: -6s; }
 @keyframes windBlow { 0% { left: -14%; opacity: 0; } 12% { opacity: .7; } 32% { opacity: 0; } 100% { left: 112%; opacity: 0; } }
-/* 飘落的叶子与花瓣 */
+/* 椋樿惤鐨勫彾瀛愪笌鑺辩摚 */
 .rc-fall { position: absolute; top: -6%; left: 60%; font-size: 12px; opacity: 0; animation: fallDown 12s linear infinite; }
 .rc-fall img { width: 14px; display: block; }
 .rc-fall.f1 { animation-duration: 15s; }
@@ -337,7 +337,7 @@
     92% { opacity: .7; }
     100% { transform: translateY(425px) translateX(20px) rotate(360deg); opacity: 0; }
 }
-/* 公路 */
+/* 鍏矾 */
 .rc-road {
     position: absolute; left: 0; right: 0; bottom: 0; height: 32px;
     background: linear-gradient(180deg, rgba(8,10,26,.32), rgba(8,10,26,.74));
@@ -347,7 +347,7 @@
     content: ''; position: absolute; left: 0; right: 0; top: 15px; height: 2px; opacity: .5;
     background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 16px, transparent 16px 34px);
 }
-/* 汽车：红车向左自然行驶，小车镜像向右 */
+/* 姹借溅锛氱孩杞﹀悜宸﹁嚜鐒惰椹讹紝灏忚溅闀滃儚鍚戝彸 */
 .rc-car { position: absolute; left: 108%; bottom: 1px; width: 38px; animation: carDriveL 17s linear infinite; }
 .rc-car img { width: 100%; display: block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)); }
 .rc-car.car2 { width: 25px; bottom: 3px; opacity: .55; animation: carDriveR 28s linear infinite; animation-delay: -13s; }
@@ -357,7 +357,7 @@
     50% { transform: scaleX(-1) translateY(-1.6px); }
     100% { left: 109%; transform: scaleX(-1) translateY(0); }
 }
-/* 路边花草树木（微风摇摆） */
+/* 璺竟鑺辫崏鏍戞湪锛堝井椋庢憞鎽嗭級 */
 .rc-plants { position: absolute; left: 0; right: 0; bottom: 23px; height: 58px; }
 .pl {
     position: absolute; bottom: 0; transform-origin: 50% 100%;
@@ -374,7 +374,7 @@
 .pl.g2 { width: 23px; animation-delay: -1.6s; }
 .pl.g3 { width: 27px; animation-delay: -.4s; }
 @keyframes plantSway { 0%,100% { transform: rotate(-2.4deg); } 50% { transform: rotate(2.4deg); } }
-/* 蝴蝶沿路起舞 */
+/* 铦磋澏娌胯矾璧疯垶 */
 .rc-butterfly { position: absolute; left: -8%; bottom: 36px; width: 21px; opacity: 0; animation: bfFly 12s ease-in-out infinite; }
 .rc-butterfly img { width: 100%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); animation: bfFlap .42s ease-in-out infinite alternate; transform-origin: 50% 60%; }
 @keyframes bfFlap { from { transform: scaleY(1) rotate(-5deg); } to { transform: scaleY(.5) rotate(5deg); } }
@@ -389,10 +389,10 @@
     100% { left: 107%; bottom: 58px; opacity: 0; }
 }
 
-/* 站点气泡 */
+/* 绔欑偣姘旀场 */
 .stop-node { position: absolute; transform: translate(-50%, -50%); z-index: 3; text-align: center; transition: all .5s cubic-bezier(.22,1,.36,1); cursor: pointer; }
 .stop-node:hover { z-index: 6; }
-/* 站点节点：3D 贴纸图标（无底色无边框，靠投影立起来） */
+/* 绔欑偣鑺傜偣锛?D 璐寸焊鍥炬爣锛堟棤搴曡壊鏃犺竟妗嗭紝闈犳姇褰辩珛璧锋潵锛?*/
 .stop-node:hover .stop-bubble { transform: scale(1.14) rotate(-3deg); }
 .stop-bubble {
     width: 58px; height: 58px; margin: 0 auto; position: relative;
@@ -416,7 +416,7 @@
 .stop-node.current .stop-emoji {
     filter: drop-shadow(0 9px 11px rgba(0,0,0,.55)) drop-shadow(0 0 13px var(--sc-glow)) drop-shadow(0 0 26px var(--sc-ring2));
 }
-/* 派蒙脚下站：隐藏图标，避免和小人重叠 */
+/* 娲捐挋鑴氫笅绔欙細闅愯棌鍥炬爣锛岄伩鍏嶅拰灏忎汉閲嶅彔 */
 .stop-node.at .stop-bubble { opacity: .3; transform: scale(.72); }
 .stop-node.at .stop-cost { position: relative; z-index: 7; }
 .stop-node.passed .stop-bubble { opacity: .5; }
@@ -425,7 +425,7 @@
 .stop-node.skipped { opacity: .28; filter: grayscale(1); }
 .stop-node.skipped .stop-bubble::after { display: none; }
 
-/* 分叉路径线 */
+/* 鍒嗗弶璺緞绾?*/
 .rc-branch-svg {
     position: absolute; inset: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 2; overflow: visible;
@@ -441,7 +441,7 @@
 }
 @keyframes branchDash { to { stroke-dashoffset: -6.4; } }
 
-/* 分支候选站：未到达=灰色预告 preview；到达后=金色脉冲 active 可点击 */
+/* 鍒嗘敮鍊欓€夌珯锛氭湭鍒拌揪=鐏拌壊棰勫憡 preview锛涘埌杈惧悗=閲戣壊鑴夊啿 active 鍙偣鍑?*/
 .stop-node.branch-choice { z-index: 8; }
 .stop-node.branch-choice.preview { opacity: .65; cursor: default; }
 .stop-node.branch-choice.preview .stop-bubble {
@@ -483,13 +483,13 @@
     margin-top: 4px; display: inline-block; padding: 2px 8px; border-radius: 999px;
     font-size: 9.5px; font-weight: 800; color: #fff; background: rgba(0,0,0,.35); border: 1px solid #ffffff2e; white-space: nowrap;
 }
-.stop-cost.rec { color: #86efac; border-color: #86efac55; }
+.stop-cost.rec { color: #f0c19a; border-color: #f0c19a55; }
 
-/* 小人（Q版动漫旅行者 SVG：贝雷帽+大眼高光+腮红+背包+运动鞋） */
+/* 灏忎汉锛圦鐗堝姩婕梾琛岃€?SVG锛氳礉闆峰附+澶х溂楂樺厜+鑵孩+鑳屽寘+杩愬姩闉嬶級 */
 .walker { position: absolute; z-index: 5; transform: translate(-50%, -82%); transition: left 1.15s cubic-bezier(.45,.05,.35,1), top 1.15s cubic-bezier(.45,.05,.35,1); pointer-events: none; }
 .w-aura {
     position: absolute; left: 50%; top: 55%; transform: translate(-50%,-50%); width: 74px; height: 74px; border-radius: 50%;
-    background: radial-gradient(circle, #ec489933 0%, transparent 70%); animation: auraPulse 2s ease infinite;
+    background: radial-gradient(circle, #c45c2633 0%, transparent 70%); animation: auraPulse 2s ease infinite;
 }
 @keyframes auraPulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity:.7;} 50% { transform: translate(-50%,-50%) scale(1.3); opacity: 1;} }
 .walker-body { position: relative; width: 62px; height: 81px; animation: walkBob .44s ease-in-out infinite; animation-play-state: paused; }
@@ -508,19 +508,19 @@
 @keyframes hatTilt { 0%,100% { transform: rotate(-4deg);} 50% { transform: rotate(5deg);} }
 .ws-eye { animation: blink 4.5s ease-in-out infinite; }
 @keyframes blink { 0%,91%,100% { transform: scaleY(1);} 94% { transform: scaleY(.08);} }
-/* 疲劳态：步伐沉重 + 冒汗 */
+/* 鐤插姵鎬侊細姝ヤ紣娌夐噸 + 鍐掓睏 */
 .walker.tired .walker-body { animation-duration: .85s; }
 .walker.tired.walking .ws-leg.l1, .walker.tired.walking .ws-leg.l2 { animation-duration: .85s; }
 .walker.tired.walking .ws-arm.l1, .walker.tired.walking .ws-arm.l2 { animation-duration: .85s; }
-.walker.tired::after { content: '💧'; position: absolute; top: -6px; right: -4px; font-size: 14px; z-index: 6; animation: sweatFall 1.2s ease infinite; }
+.walker.tired::after { content: '馃挧'; position: absolute; top: -6px; right: -4px; font-size: 14px; z-index: 6; animation: sweatFall 1.2s ease infinite; }
 @keyframes sweatFall { 0% { transform: translateY(0); opacity: 1;} 100% { transform: translateY(10px); opacity: 0;} }
-/* 庆祝态：跳跃 + 双臂高举 */
+/* 搴嗙鎬侊細璺宠穬 + 鍙岃噦楂樹妇 */
 .walker.cheer .walker-body { animation: cheerJump .5s cubic-bezier(.34,1.56,.64,1) 2; }
 .walker.cheer .ws-arm.l1, .walker.cheer .ws-arm.l2 { animation: armCheer .5s cubic-bezier(.34,1.56,.64,1) 2 both; }
 @keyframes cheerJump { 0%,100% { transform: translateY(0);} 40% { transform: translateY(-20px) rotate(-3deg);} 70% { transform: translateY(-2px);} }
 @keyframes armCheer { 0%,100% { transform: rotate(0);} 40% { transform: rotate(-170deg);} }
 .walker.cheer .w-aura { background: radial-gradient(circle, #fbbf2455 0%, transparent 70%); }
-/* 贴纸小人（项目根目录存在 paimon 贴图时自动显示，盖住 SVG 备用小人） */
+/* 璐寸焊灏忎汉锛堥」鐩牴鐩綍瀛樺湪 paimon 璐村浘鏃惰嚜鍔ㄦ樉绀猴紝鐩栦綇 SVG 澶囩敤灏忎汉锛?*/
 .walker-body.sticker { width: auto; height: auto; animation: bodySquash .46s ease-in-out infinite; animation-play-state: paused; }
 .walker.walking .walker-body.sticker { animation-play-state: running; }
 @keyframes bodySquash { 0%,100% { transform: translateY(0) scaleY(1);} 50% { transform: translateY(-3px) scaleY(1.025);} }
@@ -529,11 +529,11 @@
 .w-stick-head { width: 72px; height: auto; margin: 0 auto -5px; position: relative; z-index: 2; transform-origin: 50% 92%; animation: headSway .92s ease-in-out infinite; animation-play-state: paused; }
 .walker.walking .w-stick-head { animation-play-state: running; }
 @keyframes headSway { 0%,100% { transform: rotate(-5deg);} 50% { transform: rotate(5deg);} }
-/* 贴纸欢呼：身体跳起 + 头部大幅摇摆 */
+/* 璐寸焊娆㈠懠锛氳韩浣撹烦璧?+ 澶撮儴澶у箙鎽囨憜 */
 .walker.cheer .walker-body.sticker { animation: cheerJump .5s cubic-bezier(.34,1.56,.64,1) 2; }
 .walker.cheer .w-stick-head { animation: headCheer .5s cubic-bezier(.34,1.56,.64,1) 2; }
 @keyframes headCheer { 0%,100% { transform: rotate(0);} 30% { transform: rotate(-14deg) translateY(-4px);} 65% { transform: rotate(12deg);} }
-/* 疲劳态：头耷拉 + 步伐变慢 */
+/* 鐤插姵鎬侊細澶磋€锋媺 + 姝ヤ紣鍙樻參 */
 .walker.tired .walker-body.sticker { animation-duration: .85s; }
 .walker.tired .w-stick-head { animation-duration: 1.5s; }
 .w-img {
@@ -544,11 +544,11 @@
     z-index: 2;
 }
 
-/* 起点牌（青绿金圆牌 + 脉冲光环） */
+/* 璧风偣鐗岋紙闈掔豢閲戝渾鐗?+ 鑴夊啿鍏夌幆锛?*/
 .trip-origin { position: absolute; z-index: 2; transform: translate(-50%,-56%); text-align: center; pointer-events: none; }
 .to-badge {
     position: relative; width: 36px; height: 36px; margin: 0 auto; border-radius: 50%;
-    background: linear-gradient(135deg,#6ee7b7,#22d3ee 70%);
+    background: #e07a3d;
     display: flex; align-items: center; justify-content: center;
     color: #05303a; font-size: 15px; font-weight: 900;
     animation: originPulse 2.2s ease-in-out infinite;
@@ -570,9 +570,9 @@
 }
 .trip-origin.at .to-badge { visibility: hidden; }
 
-/* 当前站点卡 */
+/* 褰撳墠绔欑偣鍗?*/
 .now-stop { margin-top: 14px; border-radius: 22px; padding: 15px 16px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); position: relative; overflow: hidden; }
-.now-stop::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg,#ec4899,#8b5cf6); }
+.now-stop::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg,#c45c26,#c45c26); }
 .ns-head { display: flex; align-items: center; gap: 10px; }
 .ns-ico { width: 46px; height: 46px; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ns-ico img { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 5px 7px rgba(0,0,0,.45)) drop-shadow(0 0 8px var(--sc-glow)); }
@@ -581,10 +581,10 @@
 .ns-info p { margin: 3px 0 0; color: #ffffff9c; font-size: 11px; line-height: 1.55; }
 .ns-stats { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
 .ns-stat { padding: 5px 11px; border-radius: 999px; font-size: 10.5px; font-weight: 800; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #fff; display: flex; align-items: center; gap: 5px; }
-.ns-stat.cost { color: #fda4af; border-color: #fda4af44; }
-.ns-stat.rec { color: #86efac; border-color: #86efac44; }
+.ns-stat.cost { color: #f0c19a; border-color: #f0c19a44; }
+.ns-stat.rec { color: #f0c19a; border-color: #f0c19a44; }
 
-/* 操作按钮区 */
+/* 鎿嶄綔鎸夐挳鍖?*/
 .action-row { display: flex; gap: 10px; margin-top: 14px; }
 .act-btn {
     flex: 1; border: none; border-radius: 17px; padding: 14px 8px; cursor: pointer; font-family: inherit;
@@ -593,14 +593,14 @@
 }
 .act-btn small { font-size: 9.5px; font-weight: 600; opacity: .8; letter-spacing: 0; }
 .act-btn:active { transform: scale(.96); }
-.act-btn.go { background: linear-gradient(135deg,#ec4899,#8b5cf6); box-shadow: 0 8px 24px #8b5cf666; }
+.act-btn.go { background: linear-gradient(135deg,#c45c26,#c45c26); box-shadow: 0 8px 24px #c45c2666; }
 .act-btn.go:hover { transform: translateY(-2px); }
 .act-btn.rest { background: rgba(52,211,153,.14); border: 1.5px solid rgba(52,211,153,.4); color: #a7f3d0; }
 .act-btn.rest:hover { background: rgba(52,211,153,.24); }
 .act-btn.replan { flex: 0 0 auto; width: 92px; background: rgba(251,191,36,.12); border: 1.5px solid rgba(251,191,36,.4); color: #fde68a; }
 .act-btn.replan:hover { background: rgba(251,191,36,.22); }
 
-/* 智能建议卡 */
+/* 鏅鸿兘寤鸿鍗?*/
 .advice-card {
     margin-top: 14px; border-radius: 20px; padding: 14px 16px; position: relative; overflow: hidden;
     background: linear-gradient(135deg, rgba(251,113,133,.14), rgba(139,92,246,.14));
@@ -610,7 +610,7 @@
 @keyframes eSlideUp { from { opacity: 0; transform: translateY(14px);} to { opacity: 1; transform: none;} }
 .advice-card.ok { background: linear-gradient(135deg, rgba(52,211,153,.13), rgba(34,211,238,.13)); border-color: rgba(52,211,153,.35); }
 .advice-head { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 13px; font-weight: 800; }
-.advice-head .pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: #fb7185; box-shadow: 0 0 0 0 #fb718588; animation: dotPulse 1.6s infinite; }
+.advice-head .pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: #e07a3d; box-shadow: 0 0 0 0 #e07a3d88; animation: dotPulse 1.6s infinite; }
 .advice-card.ok .pulse-dot { background: #34d399; box-shadow: 0 0 0 0 #34d39988; }
 @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 currentColor; } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .advice-card p { margin: 8px 0 0; color: #ffe4e6; font-size: 11.8px; line-height: 1.75; }
@@ -621,14 +621,14 @@
     font-size: 11.5px; font-weight: 800; transition: transform .15s;
 }
 .advice-acts button:active { transform: scale(.96); }
-.advice-acts .aa-main { background: linear-gradient(135deg,#ec4899,#8b5cf6); color: #fff; }
+.advice-acts .aa-main { background: linear-gradient(135deg,#c45c26,#c45c26); color: #fff; }
 .advice-acts .aa-sub { background: rgba(255,255,255,.1); color: #e6e6ff; border: 1px solid rgba(255,255,255,.18); }
 
-/* 砍站动画 */
+/* 鐮嶇珯鍔ㄧ敾 */
 .stop-node.cutting { animation: cutOut .5s ease forwards; }
 @keyframes cutOut { 0% { transform: translate(-50%,-50%) scale(1);} 40% { transform: translate(-50%,-50%) scale(1.15) rotate(6deg); opacity: 1;} 100% { transform: translate(-50%,-50%) scale(.3); opacity: 0;} }
 
-/* ============ 结算页 ============ */
+/* ============ 缁撶畻椤?============ */
 .finish-wrap { text-align: center; padding-top: 20px; }
 .finish-trophy { font-size: 62px; display: inline-block; animation: trophyPop .8s cubic-bezier(.34,1.56,.64,1); filter: drop-shadow(0 10px 26px #fbbf2466); }
 .finish-cover {
@@ -657,15 +657,15 @@
 .fs-card { border-radius: 18px; padding: 14px 6px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); }
 .fs-card b { display: block; font-size: 21px; color: #fff; }
 .fs-card span { display: block; margin-top: 4px; font-size: 10px; color: #ffffff99; }
-.finish-medal { margin-top: 16px; border-radius: 20px; padding: 15px; background: linear-gradient(135deg, rgba(251,191,36,.12), rgba(236,72,153,.12)); border: 1px solid rgba(251,191,36,.35); }
+.finish-medal { margin-top: 16px; border-radius: 20px; padding: 15px; background: linear-gradient(135deg, rgba(251,191,36,.12), rgba(196, 92, 38,.12)); border: 1px solid rgba(251,191,36,.35); }
 .finish-medal h4 { margin: 0; color: #fde68a; font-size: 15px; font-weight: 900; }
 .finish-medal p { margin: 6px 0 0; color: #ffffffb8; font-size: 11.5px; line-height: 1.7; }
 
-/* 粒子（到站庆祝） */
+/* 绮掑瓙锛堝埌绔欏簡绁濓級 */
 .sparkle { position: absolute; width: 8px; height: 8px; pointer-events: none; z-index: 9; font-size: 12px; animation: sparkleFly .9s ease-out forwards; }
 @keyframes sparkleFly { 0% { transform: translate(0,0) scale(1); opacity: 1;} 100% { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0;} }
 
-/* 站点详情弹窗 */
+/* 绔欑偣璇︽儏寮圭獥 */
 .stop-detail-mask {
     position: absolute; inset: 0; z-index: 60; display: none;
     align-items: center; justify-content: center; padding: 24px;
@@ -679,7 +679,7 @@
     animation: sdPop .38s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes sdPop { 0% { transform: scale(.75) translateY(20px); opacity: 0;} 100% { transform: none; opacity: 1;} }
-.sd-hero { position: relative; padding: 22px 20px 14px; text-align: center; background: var(--sc, linear-gradient(135deg,#7c83ff,#5b63f5)); }
+.sd-hero { position: relative; padding: 22px 20px 14px; text-align: center; background: var(--sc, linear-gradient(135deg,#e07a3d,#0f766e)); }
 .sd-hero::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26px; background: inherit; filter: blur(0); }
 .sd-ico {
     width: 78px; height: 78px; margin: 0 auto; background: transparent; border: none;
@@ -708,14 +708,14 @@
 .sd-row i.sd-ri { width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; flex-shrink: 0; }
 .sd-row .sd-rl { flex: 1; color: #ffffffa8; font-size: 11.5px; font-weight: 600; }
 .sd-row .sd-rv { color: #fff; font-size: 13.5px; font-weight: 900; }
-.sd-row .sd-rv.cost { color: #fda4af; } .sd-row .sd-rv.rec { color: #86efac; }
+.sd-row .sd-rv.cost { color: #f0c19a; } .sd-row .sd-rv.rec { color: #f0c19a; }
 .sd-status { margin-top: 12px; text-align: center; padding: 8px; border-radius: 12px; font-size: 11px; font-weight: 800; }
 .sd-status.passed { background: rgba(255,255,255,.07); color: #ffffff8c; }
-.sd-status.current { background: rgba(236,72,153,.15); border: 1px dashed rgba(236,72,153,.5); color: #fbcfe8; }
-.sd-status.future { background: rgba(124,131,255,.12); border: 1px dashed rgba(124,131,255,.45); color: #c7caff; }
+.sd-status.current { background: rgba(196, 92, 38,.15); border: 1px dashed rgba(196, 92, 38,.5); color: #99f6e4; }
+.sd-status.future { background: rgba(45, 212, 191,.12); border: 1px dashed rgba(45, 212, 191,.45); color: #c7caff; }
 .sd-status.skipped { background: rgba(255,255,255,.05); color: #ffffff55; text-decoration: line-through; }
 
-/* toast 复用主应用样式，浮层内小提醒 */
+/* toast 澶嶇敤涓诲簲鐢ㄦ牱寮忥紝娴眰鍐呭皬鎻愰啋 */
 .e-mini-toast {
     position: absolute; left: 50%; top: 70px; transform: translateX(-50%) translateY(-14px); z-index: 50;
     padding: 9px 18px; border-radius: 999px; background: rgba(0,0,0,.55); border: 1px solid #ffffff2a;
@@ -723,11 +723,11 @@
 }
 .e-mini-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ===== 自定义路线入口 ===== */
+/* ===== 鑷畾涔夎矾绾垮叆鍙?===== */
 .custom-route-entry {
     display: flex; align-items: center; gap: 14px;
     margin: 6px 2px 0; padding: 14px 16px; border-radius: 18px; cursor: pointer;
-    background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(236,72,153,.25));
+    background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(196, 92, 38,.25));
     border: 1.5px dashed rgba(251,191,36,.6);
     transition: all .25s;
 }
@@ -742,7 +742,7 @@
 .cre-text p { margin: 3px 0 0; font-size: 11px; color: #ffffffaa; line-height: 1.5; }
 .cre-arrow { color: #fbbf24; font-size: 13px; }
 
-/* ===== 自定义路线大地图弹层 ===== */
+/* ===== 鑷畾涔夎矾绾垮ぇ鍦板浘寮瑰眰 ===== */
 .custom-map-overlay {
     position: absolute; inset: 0; z-index: 60;
     background: rgba(10,10,30,.85); backdrop-filter: blur(16px);
@@ -771,7 +771,7 @@
 .cm-body { flex: 1; display: flex; min-height: 0; }
 .cm-map {
     flex: 1; position: relative; min-width: 0;
-    background: radial-gradient(ellipse at 30% 20%, #1e3a5f 0%, #0f172a 60%, #020617 100%);
+    background: radial-gradient(ellipse at 30% 20%, #0f2a44 0%, #0f172a 60%, #020617 100%);
     overflow: hidden;
 }
 .cm-map-bg {
@@ -815,7 +815,7 @@
     display: flex; align-items: center; justify-content: center;
 }
 
-/* 右侧面板 */
+/* 鍙充晶闈㈡澘 */
 .cm-side {
     width: 280px; display: flex; flex-direction: column;
     border-left: 1px solid rgba(255,255,255,.08);
@@ -863,7 +863,7 @@
 }
 .cm-btn {
     flex: 1; padding: 11px; border: none; border-radius: 12px; cursor: pointer;
-    background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff;
+    background: linear-gradient(135deg, #c45c26, #c45c26); color: #fff;
     font-size: 13px; font-weight: 800; transition: all .2s;
 }
 .cm-btn:hover { transform: translateY(-1px); }
