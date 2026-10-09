@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!-- 作者：周梓润 -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡诺循环 · 理论推导与动画演示｜物理化学作业</title>
+<style>
+/* ================= 基础与变量 ================= */
+:root{
+  --indigo:#6366f1; --indigo-l:#a5b4fc; --cyan:#06b6d4; --cyan-l:#67e8f9;
+  --green:#10b981; --green-l:#6ee7b7; --pink:#ec4899; --amber:#f59e0b; --red:#ef4444;
+  --orange:#f97316; --orange-l:#fdba74;
+  --ink:#e9edff; --ink-dim:#aab4dc; --ink-faint:#7a84ad;
+  --glass:rgba(255,255,255,.055); --glass-2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.13);
+  --serif:"Times New Roman","STIXTwoText","Cambria Math",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  color:var(--ink); background:#070b18; line-height:1.75; overflow-x:hidden;
+}
+.math{font-family:var(--serif); font-style:italic; letter-spacing:.02em}
+::selection{background:rgba(99,102,241,.45)}
+sub,sup{font-size:.72em}
+
+/* ================= 动态背景 ================= */
+.bg{position:fixed; inset:0; z-index:-2;
+  background:
+    radial-gradient(1200px 800px at 80% -10%, #1b2350 0%, transparent 60%),
+    radial-gradient(1000px 700px at -10% 30%, #10243a 0%, transparent 55%),
+    linear-gradient(180deg,#070b18 0%,#0b1026 45%,#0a1530 100%);}
+.orb{position:fixed; border-radius:50%; filter:blur(70px); opacity:.30; z-index:-1;
+  animation:float 18s ease-in-out infinite alternate}
+.orb.o1{width:420px;height:420px;left:-120px;top:8%;background:#6366f1}
+.orb.o2{width:360px;height:360px;right:-100px;top:42%;background:#06b6d4;animation-delay:-6s}
+.orb.o3{width:300px;height:300px;left:30%;bottom:-120px;background:#f97316;animation-delay:-12s;opacity:.20}
+@keyframes float{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,-50px) scale(1.15)}}
+
+/* ================= 顶部导航与进度 ================= */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:100;
+  background:linear-gradient(90deg,var(--indigo),var(--cyan),var(--orange));
+  box-shadow:0 0 12px rgba(103,232,249,.8)}
+nav{position:fixed;top:0;left:0;right:0;z-index:90;
+  background:linear-gradient(180deg,rgba(10,14,32,.72),rgba(10,14,32,.35) 70%,transparent);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;
+  border-image:linear-gradient(90deg,transparent,rgba(165,180,252,.5),transparent) 1;
+}
+.nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:10px 22px}
+.nav-logo{font-weight:700;font-size:14px;letter-spacing:.05em;white-space:nowrap;
+  background:linear-gradient(90deg,var(--indigo-l),var(--cyan-l));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{color:var(--ink-dim);text-decoration:none;font-size:12.5px;padding:5px 10px;border-radius:99px;transition:.25s;white-space:nowrap}
+.nav-links a:hover{color:var(--ink);background:var(--glass-2)}
+
+/* ================= 版式容器 ================= */
+main{max-width:1080px;margin:0 auto;padding:0 24px}
+section{padding:84px 0 30px;scroll-margin-top:70px}
+.sec-tag{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.22em;color:var(--cyan-l);font-weight:600;margin-bottom:14px}
+.sec-tag::before{content:"";width:34px;height:2px;background:linear-gradient(90deg,var(--cyan),transparent)}
+h2.title{font-size:clamp(26px,3.6vw,38px);line-height:1.3;font-weight:800;margin-bottom:14px}
+.grad-text{background:linear-gradient(92deg,#c7d2fe 0%,#67e8f9 45%,#fdba74 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--ink-dim);font-size:16.5px;max-width:820px;margin-bottom:30px}
+p.body{color:var(--ink-dim);margin:12px 0}
+p.body b, p.body strong{color:var(--ink);font-weight:600}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:22px;
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* ================= 按钮 / 徽章 ================= */
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--line);
+  color:var(--ink);background:var(--glass-2);border-radius:99px;padding:9px 20px;font-size:14px;
+  font-family:inherit;transition:.25s;user-select:none}
+.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:linear-gradient(90deg,var(--indigo),#38bdf8);border:none;font-weight:600;
+  box-shadow:0 8px 26px rgba(99,102,241,.45)}
+.btn.ghost{background:transparent}
+.chip{display:inline-block;font-size:12px;padding:3px 12px;border-radius:99px;border:1px solid var(--line);
+  color:var(--ink-dim);background:rgba(255,255,255,.04);margin:3px 4px}
+.chip.ok{color:var(--green-l);border-color:rgba(110,231,183,.4);background:rgba(16,185,129,.1)}
+
+/* ================= Hero ================= */
+header.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;padding:120px 24px 60px;position:relative}
+.hero .kicker{font-size:13px;letter-spacing:.35em;color:var(--cyan-l);margin-bottom:26px;font-weight:600}
+.hero h1{font-size:clamp(34px,6vw,64px);line-height:1.18;font-weight:800;max-width:920px}
+.hero .sub{margin-top:22px;color:var(--ink-dim);font-size:clamp(15px,2vw,18.5px);max-width:760px}
+.hero .core-q{margin-top:38px;max-width:820px;padding:24px 32px;border-radius:24px;position:relative}
+.hero .core-q::before{content:"";position:absolute;inset:-1px;border-radius:24px;padding:1px;
+  background:linear-gradient(120deg,var(--indigo),var(--cyan),var(--orange));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.7}
+.hero .core-q .formula{margin:6px 0 2px}
+.route{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:32px}
+.route .chip{font-size:13px;padding:7px 16px}
+.hero .meta{margin-top:40px;font-size:13.5px;color:var(--ink-faint)}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--ink-faint);font-size:12px;
+  animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ================= 卡片 / 公式 / 表格 ================= */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{padding:26px 28px}
+.card h3{font-size:18px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.card .idx{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--cyan-l);
+  border:1px solid rgba(103,232,249,.4);border-radius:8px;padding:1px 9px}
+.note{border-left:3px solid var(--cyan);padding:14px 18px;margin:20px 0;border-radius:0 14px 14px 0;
+  background:rgba(6,182,212,.07);color:var(--ink-dim);font-size:14.5px}
+.note.key{border-color:var(--green);background:rgba(16,185,129,.08)}
+.note b{color:var(--ink)}
+.formula{font-family:var(--serif);font-style:italic;font-size:20px;text-align:center;padding:16px 12px;margin:16px 0;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;overflow-x:auto;white-space:nowrap}
+.formula .boxed{border:2px solid var(--green);border-radius:12px;padding:8px 22px;display:inline-block;
+  box-shadow:0 0 24px rgba(16,185,129,.25)}
+.tbl-wrap{overflow-x:auto;margin:16px 0}
+table.data{width:100%;border-collapse:collapse;font-size:14.5px;min-width:640px}
+table.data th,table.data td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:center}
+table.data th{color:var(--cyan-l);font-weight:600;font-size:13px;letter-spacing:.05em;
+  background:rgba(6,182,212,.06)}
+table.data td{color:var(--ink-dim)}
+table.data td.math{color:var(--ink);font-size:15.5px}
+table.data tr.hl td{background:rgba(255,255,255,.05);color:var(--ink)}
+table.data tr.sum td{border-top:2px solid rgba(110,231,183,.5);color:var(--green-l);font-weight:700;background:rgba(16,185,129,.06)}
+.pdot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:baseline}
+
+/* ================= 模拟器布局 ================= */
+.sim-params{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end}
+.param{flex:1;min-width:200px}
+.param label{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-dim);margin-bottom:8px}
+.param label b{color:var(--cyan-l);font-family:var(--serif);font-size:15px}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;
+  background:linear-gradient(90deg,var(--indigo),var(--cyan));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;
+  background:#fff;border:3px solid var(--indigo);box-shadow:0 2px 10px rgba(99,102,241,.6);cursor:pointer;transition:.2s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
+  background:#fff;border:3px solid var(--indigo);box-shadow:0 2px 10px rgba(99,102,241,.6);cursor:pointer}
+.sim-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:20px}
+@media (max-width:920px){.sim-grid{grid-template-columns:1fr}}
+.panel{padding:20px;position:relative}
+.panel .p-title{font-size:13.5px;color:var(--ink-faint);letter-spacing:.12em;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;justify-content:space-between}
+canvas.stage{width:100%;display:block;border-radius:14px;background:rgba(4,7,17,.55);border:1px solid rgba(255,255,255,.07)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.controls .spd{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-dim);flex:1;min-width:180px}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:10px;margin-top:16px}
+.ro{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-align:center}
+.ro .k{font-size:12px;color:var(--ink-faint);letter-spacing:.08em}
+.ro .v{font-family:var(--serif);font-size:19px;margin-top:2px;color:var(--ink)}
+.ro .u{font-size:11px;color:var(--ink-faint)}
+.ro.hot .v{color:var(--orange-l)}
+.ro.cold .v{color:var(--cyan-l)}
+.proc-badge{display:inline-flex;align-items:center;gap:9px;padding:7px 16px;border-radius:99px;font-weight:700;font-size:14.5px;
+  border:1px solid;transition:.3s}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--ink-dim)}
+.legend .item{display:flex;align-items:center;gap:7px}
+.legend .sw{width:22px;height:4px;border-radius:99px}
+.cycle-total{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.ct{border-radius:14px;padding:12px 14px;border:1px solid var(--line);background:rgba(255,255,255,.04);text-align:center}
+.ct .k{font-size:12px;color:var(--ink-faint)}
+.ct .v{font-family:var(--serif);font-style:italic;font-size:18px;margin-top:2px}
+.ct.zero .v{color:var(--green-l)}
+.ct.eta .v{color:var(--orange-l)}
+
+/* ================= AI 章节 ================= */
+.prompt-box{background:rgba(4,7,17,.6);border:1px solid var(--line);border-radius:14px;
+  padding:16px 18px;font-size:14px;color:var(--cyan-l);margin:12px 0;position:relative;line-height:1.7}
+.prompt-box::before{content:"PROMPT";position:absolute;top:-9px;left:16px;font-size:10px;letter-spacing:.2em;
+  background:#0b1026;padding:0 8px;color:var(--ink-faint);border-radius:99px;border:1px solid var(--line)}
+
+/* ================= 滚动显现 ================= */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+footer{margin-top:70px;padding:34px 24px 46px;text-align:center;color:var(--ink-faint);font-size:13px;
+  border-top:1px solid rgba(255,255,255,.07)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+<div id="progress"></div>
+
+<nav>
+  <div class="nav-in">
+    <div class="nav-logo">CARNOT CYCLE · 卡诺循环</div>
+    <div class="nav-links">
+      <a href="#derivation">理论推导</a>
+      <a href="#sim">动画演示</a>
+      <a href="#verify">数值验证</a>
+      <a href="#ai">AI 使用说明</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="kicker">10.9 物理化学作业 · 热力学第二定律</div>
+  <h1><span class="grad-text">卡诺循环</span><br>理论推导与动画演示</h1>
+  <p class="sub">以理想气体为工作物质，经历 <b>等温膨胀 → 绝热膨胀 → 等温压缩 → 绝热压缩</b> 四个可逆过程，证明循环的热温商之和等于零。</p>
+  <div class="core-q glass">
+    <div class="formula" style="border:none;background:none;padding:4px;margin:0">
+      <span class="math">Q<sub>h</sub>/T<sub>h</sub> + Q<sub>c</sub>/T<sub>c</sub> = 0</span>
+      &nbsp;&nbsp;<span style="color:var(--ink-faint);font-size:15px">⇒</span>&nbsp;&nbsp;
+      <span class="math">η = 1 − T<sub>c</sub>/T<sub>h</sub></span>
+    </div>
+  </div>
+  <div class="route">
+    <span class="chip">① 等温膨胀 Q<sub>h</sub></span>
+    <span class="chip">② 绝热膨胀 Q=0</span>
+    <span class="chip">③ 等温压缩 Q<sub>c</sub></span>
+    <span class="chip">④ 绝热压缩 Q=0</span>
+  </div>
+  <div class="meta">作者：周梓润　·　学号：202511998372　·　生命科学学院</div>
+  <div class="scroll-hint">▼ 向下滚动</div>
+</header>
+
+<main>
+
+<!-- ==================== 一、理论推导 ==================== -->
+<section id="derivation">
+  <div class="sec-tag">PART 1 · 理论推导</div>
+  <h2 class="title grad-text">证明：卡诺循环的热温商之和等于零</h2>
+  <p class="lead">采用物理化学符号约定 <span class="math">ΔU = Q + W</span>（W 为环境对体系做功，<span class="math">W = −∫p dV</span>）。工作物质为 <span class="math">n</span> mol 理想气体，热容比 <span class="math">γ = C<sub>p,m</sub>/C<sub>V,m</sub></span>。</p>
+
+  <div class="card glass reveal">
+    <h3><span class="idx">0</span>循环的四个过程</h3>
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead><tr><th>过程</th><th>名称</th><th>约束条件</th><th>体积</th><th>温度</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pdot" style="background:#f97316"></span><span class="math">1→2</span></td><td>等温膨胀</td><td>与高温热源 <span class="math">T<sub>h</sub></span> 接触</td><td class="math">V₁→V₂</td><td class="math">Tₕ 不变</td></tr>
+          <tr><td><span class="pdot" style="background:#06b6d4"></span><span class="math">2→3</span></td><td>绝热膨胀</td><td>无热交换 <span class="math">Q=0</span></td><td class="math">V₂→V₃</td><td class="math">Tₕ→T<sub>c</sub></td></tr>
+          <tr><td><span class="pdot" style="background:#6366f1"></span><span class="math">3→4</span></td><td>等温压缩</td><td>与低温热源 <span class="math">T<sub>c</sub></span> 接触</td><td class="math">V₃→V₄</td><td class="math">T<sub>c</sub> 不变</td></tr>
+          <tr><td><span class="pdot" style="background:#10b981"></span><span class="math">4→1</span></td><td>绝热压缩</td><td>无热交换 <span class="math">Q=0</span></td><td class="math">V₄→V₁</td><td class="math">T<sub>c</sub>→Tₕ</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:20px">
+    <div class="card glass reveal">
+      <h3><span class="idx">①</span>等温过程的热量</h3>
+      <p class="body">理想气体内能只是温度的函数，等温过程 <span class="math">ΔU = 0</span>，故 <span class="math">Q = −W = ∫p dV = nRT·ln(V<sub>f</sub>/V<sub>i</sub>)</span>：</p>
+      <div class="formula">Q<sub>h</sub> = nRT<sub>h</sub> ln(V₂/V₁) &gt; 0</div>
+      <div class="formula">Q<sub>c</sub> = nRT<sub>c</sub> ln(V₄/V₃) &lt; 0</div>
+      <p class="body" style="font-size:14px">高温等温膨胀<b>吸热</b> Q<sub>h</sub>；低温等温压缩<b>放热</b> |Q<sub>c</sub>|。</p>
+    </div>
+    <div class="card glass reveal">
+      <h3><span class="idx">②</span>绝热过程无热温商贡献</h3>
+      <p class="body">2→3 与 4→1 均为绝热过程：</p>
+      <div class="formula">Q<sub>2→3</sub> = Q<sub>4→1</sub> = 0</div>
+      <p class="body" style="font-size:14px">因此它们对热温商之和 <b>没有贡献</b>，只需考察两个等温过程。但绝热过程提供了关键的<b>体积比关系</b>（见第③步）。</p>
+    </div>
+  </div>
+
+  <div class="card glass reveal" style="margin-top:20px">
+    <h3><span class="idx">③</span>用绝热过程方程建立体积比关系</h3>
+    <p class="body">理想气体<b>可逆绝热过程</b>满足 <span class="math">TV<sup>γ−1</sup> = 常数</span>。分别应用于两条绝热线：</p>
+    <div class="formula">T<sub>h</sub>V₂<sup>γ−1</sup> = T<sub>c</sub>V₃<sup>γ−1</sup>　<span style="color:var(--ink-faint)">(i)</span>　　T<sub>c</sub>V₄<sup>γ−1</sup> = T<sub>h</sub>V₁<sup>γ−1</sup>　<span style="color:var(--ink-faint)">(ii)</span></div>
+    <p class="body">(i) ÷ (ii)，温度因子恰好消去：</p>
+    <div class="formula">V₂/V₁ = V₃/V₄　⟺　V₄/V₃ = V₁/V₂</div>
+  </div>
+
+  <div class="card glass reveal" style="margin-top:20px">
+    <h3><span class="idx">④</span>热温商求和</h3>
+    <div class="formula">Q<sub>h</sub>/T<sub>h</sub> + Q<sub>c</sub>/T<sub>c</sub> = nR·ln(V₂/V₁) + nR·ln(V₄/V₃) = nR·ln(V₂V₄ / V₁V₃)</div>
+    <p class="body">代入第③步结论 <span class="math">V₂/V₁ = V₃/V₄</span>，得 <span class="math">V₂V₄/(V₁V₃) = 1</span>，而 <span class="math">ln 1 = 0</span>：</p>
+    <div class="formula"><span class="boxed">Q<sub>h</sub>/T<sub>h</sub> + Q<sub>c</sub>/T<sub>c</sub> = 0</span></div>
+    <div class="note key" style="margin-bottom:0"><b>证毕 ∎</b>　卡诺循环的热温商之和等于零。这一结果与工作物质无关（此处以理想气体显式验证），它正是定义<b>热力学温标</b>与<b>熵</b>（∮ dQ<sub>可逆</sub>/T = 0）的出发点。</div>
+  </div>
+
+  <div class="note reveal">
+    <b>推论 —— 卡诺热机效率：</b>循环净功 <span class="math">−W<sub>净</sub> = Q<sub>h</sub> + Q<sub>c</sub></span>，故
+    <span class="math">η = (Q<sub>h</sub> + Q<sub>c</sub>)/Q<sub>h</sub> = 1 + Q<sub>c</sub>/Q<sub>h</sub> = 1 − T<sub>c</sub>/T<sub>h</sub></span>，只取决于两个热源的温度。
+  </div>
+</section>
+
+<!-- ==================== 二、动画演示 ==================== -->
+<section id="sim">
+  <div class="sec-tag">PART 2 · 动画演示</div>
+  <h2 class="title grad-text">卡诺循环动态演示</h2>
+  <p class="lead">左图为动态 <span class="math">p–V</span> 图：两个状态沿两条等温线与两条绝热线循环运行，阴影面积为循环净功；右图为同步活塞–气缸模型：气体分子颜色随温度变化，等温过程与热源交换热量，绝热过程气缸包裹保温层。取 <span class="math">n = 1</span> mol，<span class="math">γ = 1.4</span>（双原子分子）。</p>
+
+  <div class="card glass reveal">
+    <div class="sim-params">
+      <div class="param">
+        <label>高温热源 T<sub>h</sub><b id="vTh">600 K</b></label>
+        <input type="range" id="sTh" min="400" max="800" step="10" value="600">
+      </div>
+      <div class="param">
+        <label>低温热源 T<sub>c</sub><b id="vTc">300 K</b></label>
+        <input type="range" id="sTc" min="250" max="390" step="10" value="300">
+      </div>
+      <div class="param">
+        <label>等温膨胀比 V₂/V₁<b id="vR">2.0</b></label>
+        <input type="range" id="sR" min="15" max="30" step="1" value="20">
+      </div>
+    </div>
+  </div>
+
+  <div class="sim-grid">
+    <div class="panel glass reveal">
+      <div class="p-title"><span>动态 p–V 图</span><span style="letter-spacing:0">阴影 = 净功输出</span></div>
+      <canvas class="stage" id="cvPV" height="430"></canvas>
+      <div class="legend">
+        <span class="item"><span class="sw" style="background:#f97316"></span>1→2 等温膨胀</span>
+        <span class="item"><span class="sw" style="background:#06b6d4"></span>2→3 绝热膨胀</span>
+        <span class="item"><span class="sw" style="background:#6366f1"></span>3→4 等温压缩</span>
+        <span class="item"><span class="sw" style="background:#10b981"></span>4→1 绝热压缩</span>
+      </div>
+    </div>
+    <div class="panel glass reveal">
+      <div class="p-title"><span>活塞 – 气缸模型</span><span id="pvState" style="letter-spacing:0;color:var(--cyan-l)"></span></div>
+      <canvas class="stage" id="cvPiston" height="430"></canvas>
+    </div>
+  </div>
+
+  <div class="card glass reveal" style="margin-top:20px">
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <span class="proc-badge" id="procBadge">—</span>
+      <div class="controls" style="margin-top:0">
+        <button class="btn primary" id="btnPlay">⏸ 暂停</button>
+        <button class="btn" id="btnStep">⏭ 下一过程</button>
+        <button class="btn ghost" id="btnReset">↺ 重置</button>
+        <div class="spd">速度 <input type="range" id="sSpd" min="25" max="250" step="25" value="100" style="max-width:130px"> <b id="vSpd" style="color:var(--cyan-l)">1.0×</b></div>
+      </div>
+    </div>
+    <div class="readouts">
+      <div class="ro hot"><div class="k">温度 T</div><div class="v" id="roT">—</div><div class="u">K</div></div>
+      <div class="ro"><div class="k">压强 p</div><div class="v" id="roP">—</div><div class="u">kPa</div></div>
+      <div class="ro"><div class="k">体积 V</div><div class="v" id="roV">—</div><div class="u">L</div></div>
+      <div class="ro"><div class="k">本过程 Q</div><div class="v" id="roQ">—</div><div class="u">J（吸热为正）</div></div>
+      <div class="ro"><div class="k">本过程 W</div><div class="v" id="roW">—</div><div class="u">J（对体系为正）</div></div>
+      <div class="ro"><div class="k">本过程 ΔU</div><div class="v" id="roU">—</div><div class="u">J</div></div>
+    </div>
+    <div class="cycle-total">
+      <div class="ct"><div class="k">循环吸热 Q<sub>h</sub></div><div class="v" id="ctQh" style="color:var(--orange-l)">—</div></div>
+      <div class="ct"><div class="k">循环放热 Q<sub>c</sub></div><div class="v" id="ctQc" style="color:var(--cyan-l)">—</div></div>
+      <div class="ct"><div class="k">净功 −W<sub>净</sub>（对外）</div><div class="v">—</div></div>
+      <div class="ct zero"><div class="k">Q<sub>h</sub>/T<sub>h</sub> + Q<sub>c</sub>/T<sub>c</sub></div><div class="v" id="ctSum">—</div></div>
+      <div class="ct eta"><div class="k">效率 η = 1 − T<sub>c</sub>/T<sub>h</sub></div><div class="v" id="ctEta">—</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 三、数值验证 ==================== -->
+<section id="verify">
+  <div class="sec-tag">PART 3 · 数值验证</div>
+  <h2 class="title grad-text">用真实数值核对推导</h2>
+  <p class="lead">下表按当前滑块参数（<span id="vParams" class="math"></span>）实时计算四个过程的热力学量。可以观察：<b>每一行都满足 <span class="math">ΔU = Q + W</span></b>；四个过程 <span class="math">ΔU</span> 之和为零（状态函数循环复原）；<b>热温商之和恒为零</b>。</p>
+  <div class="card glass reveal">
+    <div class="tbl-wrap">
+      <table class="data" id="tblVerify">
+        <thead><tr>
+          <th>过程</th><th>Q / J</th><th>W / J</th><th>ΔU / J</th><th>Q/T (J·K⁻¹)</th><th>ΔU = Q + W ?</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="note key" style="margin-bottom:0">
+      <b>科学准确性自查：</b>① 两绝热过程 Q = 0；② 等温过程 ΔU = 0；③ <span class="math">ΣΔU = 0</span>（循环积分为零，符合状态函数性质）；④ <span class="math">Q<sub>h</sub>/T<sub>h</sub> + Q<sub>c</sub>/T<sub>c</sub></span> 在任意参数下均为 0（数值上 &lt; 10⁻¹⁰，即浮点零）；⑤ 效率两种算法 <span class="math">1 + Q<sub>c</sub>/Q<sub>h</sub></span> 与 <span class="math">1 − T<sub>c</sub>/T<sub>h</sub></span> 完全一致。
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 四、AI 使用说明 ==================== -->
+<section id="ai">
+  <div class="sec-tag">PART 4 · AI 使用说明</div>
+  <h2 class="title grad-text">AI 工具使用情况</h2>
+  <div class="grid2">
+    <div class="card glass reveal">
+      <h3>使用工具</h3>
+      <p class="body"><b>Trae CN IDE（内置 Kimi-K3 大模型）</b>，在本地单文件 HTML 中完成全部推导整理与动画代码编写，零外部依赖，浏览器直接打开即可运行。</p>
+      <h3 style="margin-top:18px">主要提示词（首轮）</h3>
+      <div class="prompt-box">"根据理想气体卡诺循环四个过程（等温膨胀、绝热膨胀、等温压缩、绝热压缩），推导并证明热温商之和 Qh/Th + Qc/Tc = 0，写出主要步骤；并制作单文件 HTML 动态演示：动态 p–V 图 + 活塞运动与热量传递动画，标注 T、p、V、Q、W，提供播放/暂停等控制。"</div>
+    </div>
+    <div class="card glass reveal">
+      <h3>多轮修改交互</h3>
+      <p class="body" style="font-size:14.5px">
+        ① 初版生成后，要求四个过程用<b>不同颜色区分</b>并在 p–V 图上加<b>方向箭头</b>与状态点 1–4 标注；<br>
+        ② 追加<b>活塞–气缸同步动画</b>：分子运动速率随 √T 变化、颜色随温度红蓝渐变，等温过程显示热源与热量箭头，绝热过程显示保温层；<br>
+        ③ 增加<b>单步、速度调节、参数滑块</b>（T<sub>h</sub>、T<sub>c</sub>、膨胀比）以便课堂演示；<br>
+        ④ 增加<b>数值验证表</b>实时核对 ΔU = Q + W 与热温商之和；<br>
+        ⑤ 要求 AI <b>自查科学准确性</b>：符号约定 ΔU = Q + W、绝热方程 TV<sup>γ−1</sup> = 常数、η 两种算法一致性，均通过数值验证（见 Part 3）。
+      </p>
+      <h3 style="margin-top:18px">准确性核查方式</h3>
+      <p class="body" style="font-size:14.5px">拖动任意参数滑块，验证表中热温商之和恒为 0、ΣΔU 恒为 0、效率两种算法始终相等——推导结论在任意参数下成立，而非特例巧合。</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div>卡诺循环 · 理论推导与动画演示　｜　作者：周梓润 · 202511998372　｜　物理化学作业（10.9）</div>
+  <div style="margin-top:6px">单文件零依赖 · Canvas 实时物理模拟 · n = 1 mol 理想气体 · γ = 1.4</div>
+</footer>
+
+<script>
+"use strict";
+/* ============================================================
+   物理模型：1 mol 理想气体卡诺循环，γ = 1.4
+   约定：ΔU = Q + W（W 为对体系做功），单位 J / kPa / L / K
+   ============================================================ */
+const R = 8.314, GAMMA = 1.4, CV = R / (GAMMA - 1); // Cv,m = 2.5R
+const P = { Th: 600, Tc: 300, r: 2.0 };              // 可调参数
+const COLORS = ['#f97316', '#06b6d4', '#6366f1', '#10b981'];
+const PROC_NAMES = ['等温膨胀', '绝热膨胀', '等温压缩', '绝热压缩'];
+const PROC_SUB = ['1 → 2 · 接触高温热源，吸热 Q_h', '2 → 3 · 绝热，降温膨胀对外做功',
+                  '3 → 4 · 接触低温热源，放热 Q_c', '4 → 1 · 绝热，升温压缩复原'];
+
+function computeStates() {
+  const { Th, Tc, r } = P, n = 1, V1 = 1.0;
+  const k = Math.pow(Th / Tc, 1 / (GAMMA - 1));      // 绝热体积放大因子
+  const V2 = r * V1, V3 = V2 * k, V4 = V1 * k;
+  const V = [V1, V2, V3, V4];
+  const T = [Th, Th, Tc, Tc];
+  const p = V.map((v, i) => n * R * T[i] / v);
+  const Qh = n * R * Th * Math.log(V2 / V1);
+  const Qc = n * R * Tc * Math.log(V4 / V3);          // < 0
+  const dU23 = n * CV * (Tc - Th), dU41 = n * CV * (Th - Tc);
+  const proc = [
+    { Q: Qh, W: -Qh, dU: 0 },
+    { Q: 0, W: dU23, dU: dU23 },
+    { Q: Qc, W: -Qc, dU: 0 },
+    { Q: 0, W: dU41, dU: dU41 },
+  ];
+  return { V, T, p, proc, Qh, Qc };
+}
+
+/* phase ∈ [0,4)：每个整数区间对应一个过程；返回瞬时状态 */
+function stateAt(phase, st) {
+  const i = ((Math.floor(phase) % 4) + 4) % 4;
+  const s = Math.min(Math.max(phase - Math.floor(phase), 0), 1);
+  const { Th, Tc } = P, V = st.V;
+  let v, T;
+  if (i === 0)      { v = V[0] * Math.pow(V[1] / V[0], s); T = Th; }
+  else if (i === 1) { v = V[1] * Math.pow(V[2] / V[1], s); T = Th * Math.pow(V[1] / v, GAMMA - 1); }
+  else if (i === 2) { v = V[2] * Math.pow(V[3] / V[2], s); T = Tc; }
+  else              { v = V[3] * Math.pow(V[0] / V[3], s); T = Tc * Math.pow(V[3] / v, GAMMA - 1); }
+  const p = R * T / v;
+  /* 本过程内累计量 */
+  let q, w, du;
+  if (i === 0)      { q = R * Th * Math.log(v / V[0]); w = -q; du = 0; }
+  else if (i === 1) { du = CV * (T - Th); w = du; q = 0; }
+  else if (i === 2) { q = R * Tc * Math.log(v / V[2]); w = -q; du = 0; }
+  else              { du = CV * (T - Tc); w = du; q = 0; }
+  return { i, s, V: v, T, p, q, w, du };
+}
+
+/* ============================================================
+   动画状态
+   ============================================================ */
+let phase = 0, playing = true, speed = 1.0;
+let ST = computeStates();
+const PHASE_RATE = 1 / 6; // 默认每个过程 6 秒
+
+/* ---------- 画布通用 ---------- */
+function fitCanvas(cv) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== w * dpr || cv.height !== h * dpr) {
+    cv.width = w * dpr; cv.height = h * dpr;
+  }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+
+/* ============================================================
+   p–V 图
+   ============================================================ */
+const cvPV = document.getElementById('cvPV');
+
+function pvMapping(w, h) {
+  const padL = 56, padR = 18, padT = 20, padB = 44;
+  const Vmax = ST.V[2] * 1.07, pMax = ST.p[0] * 1.12;
+  return {
+    x: v => padL + (v / Vmax) * (w - padL - padR),
+    y: p => (h - padB) - (p / pMax) * (h - padT - padB),
+    padL, padR, padT, padB, Vmax, pMax
+  };
+}
+
+/* 采样某过程的曲线点 */
+function sampleProc(i, n, st) {
+  const pts = [];
+  for (let k = 0; k <= n; k++) {
+    const s = stateAt(i + k / n, st);
+    pts.push([s.V, s.p]);
+  }
+  return pts;
+}
+
+function drawPV(now) {
+  const { ctx, w, h } = fitCanvas(cvPV);
+  const m = pvMapping(w, h);
+  const cur = stateAt(phase, ST);
+  ctx.clearRect(0, 0, w, h);
+
+  /* --- 网格与坐标轴 --- */
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1;
+  for (let g = 1; g <= 5; g++) {
+    const gx = m.padL + (w - m.padL - m.padR) * g / 5;
+    const gy = m.padT + (h - m.padT - m.padB) * g / 5;
+    ctx.beginPath(); ctx.moveTo(gx, m.padT); ctx.lineTo(gx, h - m.padB); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(m.padL, gy); ctx.lineTo(w - m.padR, gy); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(m.padL, m.padT - 6); ctx.lineTo(m.padL, h - m.padB); ctx.lineTo(w - m.padR + 6, h - m.padB); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.font = 'italic 15px "Times New Roman",serif';
+  ctx.fillText('p', m.padL - 22, m.padT + 2);
+  ctx.fillText('V', w - m.padR - 2, h - m.padB + 24);
+  /* 体积刻度 */
+  ctx.font = '11px "Segoe UI",sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.35)';
+  for (let g = 1; g <= 4; g++) {
+    const vv = m.Vmax * g / 5;
+    ctx.fillText(vv.toFixed(1) + ' L', m.x(vv) - 12, h - m.padB + 18);
+  }
+
+  /* --- 完整等温线（淡） --- */
+  [['Th', P.Th, 'rgba(249,115,22,.30)'], ['Tc', P.Tc, 'rgba(99,102,241,.30)']].forEach(([lab, T, col]) => {
+    ctx.strokeStyle = col; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    for (let k = 0; k <= 120; k++) {
+      const v = m.Vmax * (k + 2) / 124, p = R * T / v;
+      k === 0 ? ctx.moveTo(m.x(v), m.y(p)) : ctx.lineTo(m.x(v), m.y(p));
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+    const vL = m.Vmax * 0.94;
+    ctx.fillStyle = col; ctx.font = 'italic 13px "Times New Roman",serif';
+    ctx.fillText('T' + (lab === 'Th' ? 'ₕ' : '𝒸') + ' = ' + T + ' K', m.x(vL) - 66, m.y(R * T / vL) - 7);
+  });
+
+  /* --- 循环内部阴影（净功） --- */
+  const cyc = [];
+  for (let i = 0; i < 4; i++) sampleProc(i, 60, ST).forEach(pt => cyc.push(pt));
+  ctx.beginPath();
+  cyc.forEach((pt, k) => k === 0 ? ctx.moveTo(m.x(pt[0]), m.y(pt[1])) : ctx.lineTo(m.x(pt[0]), m.y(pt[1])));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(253,186,116,.10)'; ctx.fill();
+
+  /* --- 四条过程曲线 --- */
+  for (let i = 0; i < 4; i++) {
+    const pts = sampleProc(i, 80, ST);
+    ctx.strokeStyle = COLORS[i]; ctx.lineWidth = 2.6;
+    ctx.shadowColor = COLORS[i]; ctx.shadowBlur = 6;
+    ctx.beginPath();
+    pts.forEach((pt, k) => k === 0 ? ctx.moveTo(m.x(pt[0]), m.y(pt[1])) : ctx.lineTo(m.x(pt[0]), m.y(pt[1])));
+    ctx.stroke(); ctx.shadowBlur = 0;
+    /* 方向箭头（过程中点） */
+    const mid = pts[40], nxt = pts[42];
+    const ax = m.x(mid[0]), ay = m.y(mid[1]);
+    const ang = Math.atan2(m.y(nxt[1]) - ay, m.x(nxt[0]) - ax);
+    ctx.save(); ctx.translate(ax, ay); ctx.rotate(ang);
+    ctx.fillStyle = COLORS[i];
+    ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(-4, -5); ctx.lineTo(-4, 5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  /* --- 已走过的轨迹加亮 --- */
+  const ti = cur.i, ts = cur.s;
+  ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+  for (let i = 0; i <= ti; i++) {
+    const upto = (i === ti) ? ts : 1;
+    if (upto <= 0) continue;
+    ctx.strokeStyle = COLORS[i]; ctx.shadowColor = COLORS[i]; ctx.shadowBlur = 14;
+    ctx.beginPath();
+    const NN = 80, last = Math.max(1, Math.round(NN * upto));
+    for (let k = 0; k <= last; k++) {
+      const s = stateAt(i + (k / NN) * upto, ST);
+      k === 0 ? ctx.moveTo(m.x(s.V), m.y(s.p)) : ctx.lineTo(m.x(s.V), m.y(s.p));
+    }
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+
+  /* --- 状态点 1–4 --- */
+  for (let i = 0; i < 4; i++) {
+    const x = m.x(ST.V[i]), y = m.y(ST.p[i]);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(x, y, 4.5, 0, 7); ctx.fill();
+    ctx.strokeStyle = COLORS[i]; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold italic 15px "Times New Roman",serif';
+    const dx = [14, 12, -18, -18][i], dy = [2, -12, -12, 16][i];
+    ctx.fillText(String(i + 1), x + dx, y + dy);
+  }
+
+  /* --- 运动点 --- */
+  const cx = m.x(cur.V), cy = m.y(cur.p);
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 18);
+  glow.addColorStop(0, 'rgba(255,255,255,.9)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, 18, 0, 7); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, 7); ctx.fill();
+  ctx.strokeStyle = COLORS[cur.i]; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, 6, 0, 7); ctx.stroke();
+
+  /* --- 当前状态数值标签 --- */
+  ctx.font = '12.5px "Segoe UI",sans-serif';
+  const label = `p=${cur.p.toFixed(0)} kPa  V=${cur.V.toFixed(2)} L  T=${cur.T.toFixed(0)} K`;
+  const lw = ctx.measureText(label).width + 18;
+  let lx = cx + 14, ly = cy - 34;
+  if (lx + lw > w - 8) lx = cx - lw - 14;
+  if (ly < 8) ly = cy + 18;
+  ctx.fillStyle = 'rgba(8,12,28,.85)';
+  ctx.strokeStyle = COLORS[cur.i]; ctx.lineWidth = 1;
+  roundRect(ctx, lx, ly, lw, 26, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e9edff'; ctx.fillText(label, lx + 9, ly + 17);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* ============================================================
+   活塞–气缸动画
+   ============================================================ */
+const cvPiston = document.getElementById('cvPiston');
+const NPART = 56;
+let parts = [];
+function initParts() {
+  parts = [];
+  for (let i = 0; i < NPART; i++) {
+    parts.push({ x: Math.random(), y: Math.random(), vx: (Math.random() - .5), vy: (Math.random() - .5) });
+  }
+}
+initParts();
+
+function tempColor(t) { // t∈[0,1] 冷→热
+  const a = [56, 189, 248], b = [248, 113, 113];
+  const c = a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+function drawPiston(now, dt) {
+  const { ctx, w, h } = fitCanvas(cvPiston);
+  const cur = stateAt(phase, ST);
+  ctx.clearRect(0, 0, w, h);
+
+  const cyT = 108, cyH = 150;              // 气缸内腔顶/高度
+  const wallX = 52;                        // 左壁
+  const maxLen = w - wallX - 96;           // 活塞最大行程
+  const frac = (cur.V - ST.V[0]) / (ST.V[2] - ST.V[0]);
+  const pistX = wallX + maxLen * (0.12 + 0.88 * frac);
+  const gasR = pistX;                      // 气体区域右边界
+
+  /* --- 保温层（绝热过程） --- */
+  if (cur.i === 1 || cur.i === 3) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(16,185,129,.7)'; ctx.lineWidth = 2;
+    ctx.setLineDash([8, 6]); ctx.lineDashOffset = -now * 0.02;
+    roundRect(ctx, wallX - 16, cyT - 16, maxLen + 64, cyH + 32, 14); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(110,231,183,.9)'; ctx.font = '12px "Segoe UI",sans-serif';
+    ctx.fillText('保温层 · Q = 0', wallX - 8, cyT - 24);
+    ctx.restore();
+  }
+
+  /* --- 热源（等温过程） --- */
+  const isHot = cur.i === 0, isCold = cur.i === 2;
+  if (isHot || isCold) {
+    const bx = wallX - 10, bw = maxLen + 52, by = cyT + cyH + 26, bh = 42;
+    const grd = ctx.createLinearGradient(bx, by, bx, by + bh);
+    if (isHot) { grd.addColorStop(0, 'rgba(239,68,68,.85)'); grd.addColorStop(1, 'rgba(154,24,24,.9)'); }
+    else       { grd.addColorStop(0, 'rgba(59,130,246,.85)'); grd.addColorStop(1, 'rgba(30,58,138,.9)'); }
+    ctx.fillStyle = grd; roundRect(ctx, bx, by, bw, bh, 10); ctx.fill();
+    ctx.strokeStyle = isHot ? '#fca5a5' : '#93c5fd'; ctx.lineWidth = 1.5;
+    roundRect(ctx, bx, by, bw, bh, 10); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px "Segoe UI",sans-serif';
+    ctx.fillText(isHot ? `高温热源 Tₕ = ${P.Th} K（恒温热库）` : `低温热源 T𝒸 = ${P.Tc} K（恒温热库）`, bx + 12, by + 26);
+    /* 热量传递箭头 */
+    const nA = 5;
+    for (let k = 0; k < nA; k++) {
+      const ax = bx + bw * (k + 0.5) / nA;
+      const osc = Math.sin(now * 0.004 + k * 1.3) * 5;
+      const dirIn = isHot; // 膨胀吸热：箭头向上入缸；压缩放热：箭头向下出库
+      const y0 = dirIn ? (by - 2 + osc) : (cyT + cyH + 2 - osc);
+      const y1 = dirIn ? (cyT + cyH + 4 + osc) : (by - 4 - osc);
+      ctx.strokeStyle = isHot ? '#fdba74' : '#67e8f9'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(ax, y0); ctx.lineTo(ax, y1); ctx.stroke();
+      const ah = dirIn ? -1 : 1;
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.beginPath();
+      ctx.moveTo(ax, y1); ctx.lineTo(ax - 5, y1 + 8 * ah * -1 + 0); ctx.lineTo(ax + 5, y1 + 8 * ah * -1);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = isHot ? '#fdba74' : '#67e8f9'; ctx.font = 'italic 13px "Times New Roman",serif';
+    ctx.fillText(isHot ? `Qₕ = +${ST.Qh.toFixed(0)} J（吸热）` : `Q𝒸 = ${ST.Qc.toFixed(0)} J（放热）`, bx + 12, by - 8);
+  }
+
+  /* --- 气缸壁 --- */
+  ctx.strokeStyle = 'rgba(233,237,255,.75)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(wallX, cyT); ctx.lineTo(wallX + maxLen + 42, cyT);
+  ctx.moveTo(wallX, cyT + cyH); ctx.lineTo(wallX + maxLen + 42, cyT + cyH);
+  ctx.moveTo(wallX, cyT - 12); ctx.lineTo(wallX, cyT + cyH + 12);
+  ctx.stroke();
+
+  /* --- 气体分子 --- */
+  const spd = 0.028 * Math.sqrt(cur.T / 300) * (speed > 0 ? 1 : 1);
+  const tN = Math.min(Math.max((cur.T - P.Tc) / (P.Th - P.Tc), 0), 1);
+  for (const pt of parts) {
+    pt.x += pt.vx * spd * dt * 0.06; pt.y += pt.vy * spd * dt * 0.06;
+    if (pt.x < 0) { pt.x = 0; pt.vx *= -1; }
+    if (pt.x > 1) { pt.x = 1; pt.vx *= -1; }
+    if (pt.y < 0) { pt.y = 0; pt.vy *= -1; }
+    if (pt.y > 1) { pt.y = 1; pt.vy *= -1; }
+    const px = wallX + 8 + pt.x * Math.max(gasR - wallX - 22, 6);
+    const py = cyT + 10 + pt.y * (cyH - 20);
+    ctx.fillStyle = tempColor(tN);
+    ctx.beginPath(); ctx.arc(px, py, 3.2, 0, 7); ctx.fill();
+  }
+
+  /* --- 活塞 --- */
+  const pGrd = ctx.createLinearGradient(pistX, 0, pistX + 20, 0);
+  pGrd.addColorStop(0, '#4b5680'); pGrd.addColorStop(.5, '#8b96c4'); pGrd.addColorStop(1, '#3a4368');
+  ctx.fillStyle = pGrd;
+  roundRect(ctx, pistX, cyT - 8, 20, cyH + 16, 5); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5;
+  roundRect(ctx, pistX, cyT - 8, 20, cyH + 16, 5); ctx.stroke();
+  /* 活塞杆 */
+  ctx.fillStyle = '#5b6690';
+  ctx.fillRect(pistX + 20, cyT + cyH / 2 - 7, w - pistX - 26, 14);
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1;
+  ctx.strokeRect(pistX + 20, cyT + cyH / 2 - 7, w - pistX - 26, 14);
+
+  /* --- 体积标注 --- */
+  ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.font = '12px "Segoe UI",sans-serif';
+  ctx.fillText(`V = ${cur.V.toFixed(2)} L`, wallX + 6, cyT + cyH + 20);
+
+  /* --- 顶部：温度指示条 --- */
+  const tbX = wallX, tbW = maxLen + 30, tbY = 52;
+  ctx.fillStyle = 'rgba(255,255,255,.08)'; roundRect(ctx, tbX, tbY, tbW, 12, 6); ctx.fill();
+  const tg = ctx.createLinearGradient(tbX, 0, tbX + tbW, 0);
+  tg.addColorStop(0, '#38bdf8'); tg.addColorStop(1, '#f87171');
+  ctx.fillStyle = tg; roundRect(ctx, tbX, tbY, tbW * tN, 12, 6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.font = '12.5px "Segoe UI",sans-serif';
+  ctx.fillText(`T = ${cur.T.toFixed(1)} K`, tbX, tbY - 8);
+  ctx.fillStyle = '#67e8f9'; ctx.fillText(`${P.Tc} K`, tbX, tbY + 30);
+  ctx.fillStyle = '#fdba74';
+  const ths = `${P.Th} K`;
+  ctx.fillText(ths, tbX + tbW - ctx.measureText(ths).width, tbY + 30);
+
+  /* --- 过程说明横幅 --- */
+  ctx.fillStyle = 'rgba(8,12,28,.82)';
+  roundRect(ctx, 12, h - 46, w - 24, 34, 10); ctx.fill();
+  ctx.strokeStyle = COLORS[cur.i]; ctx.lineWidth = 1;
+  roundRect(ctx, 12, h - 46, w - 24, 34, 10); ctx.stroke();
+  ctx.fillStyle = COLORS[cur.i]; ctx.font = 'bold 13.5px "Segoe UI",sans-serif';
+  ctx.fillText(`${PROC_NAMES[cur.i]}`, 26, h - 24);
+  ctx.fillStyle = 'rgba(233,237,255,.85)'; ctx.font = '12.5px "Segoe UI",sans-serif';
+  ctx.fillText(PROC_SUB[cur.i], 26 + ctx.measureText(PROC_NAMES[cur.i]).width + 24, h - 24);
+}
+
+/* ============================================================
+   数据面板与验证表
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const fmtJ = v => (Math.abs(v) < 0.5 ? '0' : v.toFixed(0));
+
+function updatePanel() {
+  const cur = stateAt(phase, ST);
+  const b = $('procBadge');
+  b.textContent = `过程 ${cur.i + 1}/4 · ${PROC_NAMES[cur.i]}（${(cur.s * 100).toFixed(0)}%）`;
+  b.style.color = COLORS[cur.i]; b.style.borderColor = COLORS[cur.i] + '88';
+  b.style.background = COLORS[cur.i] + '18';
+  $('pvState').textContent = `状态沿 ${['1→2', '2→3', '3→4', '4→1'][cur.i]} 移动`;
+  $('roT').textContent = cur.T.toFixed(1);
+  $('roP').textContent = cur.p.toFixed(0);
+  $('roV').textContent = cur.V.toFixed(2);
+  $('roQ').textContent = fmtJ(cur.q);
+  $('roW').textContent = fmtJ(cur.w);
+  $('roU').textContent = fmtJ(cur.du);
+  /* 循环总量 */
+  $('ctQh').textContent = `+${ST.Qh.toFixed(0)} J`;
+  $('ctQc').textContent = `${ST.Qc.toFixed(0)} J`;
+  document.querySelectorAll('.ct .v')[2].textContent = `${(ST.Qh + ST.Qc).toFixed(0)} J`;
+  const sum = ST.Qh / P.Th + ST.Qc / P.Tc;
+  $('ctSum').textContent = Math.abs(sum) < 1e-9 ? '0 ✓' : sum.toExponential(2);
+  $('ctEta').textContent = `${((1 - P.Tc / P.Th) * 100).toFixed(1)}%`;
+}
+
+function updateVerify() {
+  const tb = document.querySelector('#tblVerify tbody');
+  let rows = '', sQ = 0, sW = 0, sU = 0, sQT = 0;
+  const Tref = [P.Th, null, P.Tc, null];
+  for (let i = 0; i < 4; i++) {
+    const pr = ST.proc[i];
+    sQ += pr.Q; sW += pr.W; sU += pr.dU;
+    const qt = Tref[i] ? pr.Q / Tref[i] : 0;
+    sQT += qt;
+    rows += `<tr>
+      <td><span class="pdot" style="background:${COLORS[i]}"></span>${['1→2 ', '2→3 ', '3→4 ', '4→1 '][i]}${PROC_NAMES[i]}</td>
+      <td class="math">${fmtJ(pr.Q)}</td><td class="math">${fmtJ(pr.W)}</td><td class="math">${fmtJ(pr.dU)}</td>
+      <td class="math">${Tref[i] ? qt.toFixed(3) : '—（Q=0）'}</td>
+      <td>${Math.abs(pr.dU - (pr.Q + pr.W)) < 1e-6 ? '<span class="chip ok">✓ 成立</span>' : '✗'}</td>
+    </tr>`;
+  }
+  rows += `<tr class="sum">
+    <td>Σ（整循环）</td><td class="math">${fmtJ(sQ)}</td><td class="math">${fmtJ(sW)}</td>
+    <td class="math">${fmtJ(sU)}</td><td class="math">${Math.abs(sQT) < 1e-9 ? '0 ✓' : sQT.toExponential(2)}</td>
+    <td><span class="chip ok">η = ${((1 + ST.Qc / ST.Qh) * 100).toFixed(1)}% = ${((1 - P.Tc / P.Th) * 100).toFixed(1)}%</span></td>
+  </tr>`;
+  tb.innerHTML = rows;
+  $('vParams').textContent = `Tₕ=${P.Th} K，T𝒸=${P.Tc} K，V₂/V₁=${P.r.toFixed(1)}，n=1 mol，γ=1.4`;
+}
+
+/* ============================================================
+   主循环
+   ============================================================ */
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(now - lastT, 50); lastT = now;
+  if (playing) {
+    phase += PHASE_RATE * speed * dt / 1000;
+    if (phase >= 4) phase -= 4;
+  }
+  drawPV(now);
+  drawPiston(now, dt);
+  updatePanel();
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   控件
+   ============================================================ */
+$('btnPlay').addEventListener('click', () => {
+  playing = !playing;
+  $('btnPlay').textContent = playing ? '⏸ 暂停' : '▶ 播放';
+});
+$('btnStep').addEventListener('click', () => {
+  playing = false; $('btnPlay').textContent = '▶ 播放';
+  phase = (Math.floor(phase) + 1) % 4;
+});
+$('btnReset').addEventListener('click', () => { phase = 0; });
+$('sSpd').addEventListener('input', e => {
+  speed = e.target.value / 100;
+  $('vSpd').textContent = speed.toFixed(2).replace(/\.?0+$/, '') + '×';
+});
+
+function bindParam(id, vid, fmt, apply) {
+  $(id).addEventListener('input', e => {
+    apply(+e.target.value);
+    /* 保证 Th >= Tc + 100 */
+    if (P.Th < P.Tc + 100) { P.Th = P.Tc + 100; $('sTh').value = P.Th; $('vTh').textContent = P.Th + ' K'; }
+    ST = computeStates();
+    $(vid).textContent = fmt();
+    updateVerify();
+  });
+}
+bindParam('sTh', 'vTh', () => P.Th + ' K', v => P.Th = v);
+bindParam('sTc', 'vTc', () => P.Tc + ' K', v => P.Tc = v);
+bindParam('sR', 'vR', () => P.r.toFixed(1), v => P.r = v / 10);
+
+/* ============================================================
+   页面杂项：进度条 / 滚动显现
+   ============================================================ */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  $('progress').style.width = (d.scrollTop / (d.scrollHeight - d.clientHeight) * 100) + '%';
+});
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+}), { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+updateVerify();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
