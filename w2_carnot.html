@@ -147,7 +147,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
   display:flex;align-items:center;gap:8px;justify-content:space-between}
 canvas.stage{width:100%;display:block;border-radius:14px;background:rgba(4,7,17,.55);border:1px solid rgba(255,255,255,.07)}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
-.controls .spd{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-dim);flex:1;min-width:180px}
+.controls .spd{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-dim);flex:1;min-width:180px;white-space:nowrap}
 .readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:10px;margin-top:16px}
 .ro{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-align:center}
 .ro .k{font-size:12px;color:var(--ink-faint);letter-spacing:.08em}
@@ -524,7 +524,7 @@ function drawPV(now) {
   }
 
   /* --- 完整等温线（淡） --- */
-  [['Th', P.Th, 'rgba(249,115,22,.30)'], ['Tc', P.Tc, 'rgba(99,102,241,.30)']].forEach(([lab, T, col]) => {
+  [['Th', P.Th, 'rgba(249,115,22,.55)'], ['Tc', P.Tc, 'rgba(129,140,248,.55)']].forEach(([lab, T, col]) => {
     ctx.strokeStyle = col; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]);
     ctx.beginPath();
     for (let k = 0; k <= 120; k++) {
@@ -534,7 +534,7 @@ function drawPV(now) {
     ctx.stroke(); ctx.setLineDash([]);
     const vL = m.Vmax * 0.94;
     ctx.fillStyle = col; ctx.font = 'italic 13px "Times New Roman",serif';
-    ctx.fillText('T' + (lab === 'Th' ? 'ₕ' : '𝒸') + ' = ' + T + ' K', m.x(vL) - 66, m.y(R * T / vL) - 7);
+    ctx.fillText('T' + (lab === 'Th' ? 'ₕ' : 'c') + ' = ' + T + ' K', m.x(vL) - 66, m.y(R * T / vL) + (lab === 'Th' ? -7 : 18));
   });
 
   /* --- 循环内部阴影（净功） --- */
@@ -662,14 +662,16 @@ function drawPiston(now, dt) {
     roundRect(ctx, wallX - 16, cyT - 16, maxLen + 64, cyH + 32, 14); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(110,231,183,.9)'; ctx.font = '12px "Segoe UI",sans-serif';
-    ctx.fillText('保温层 · Q = 0', wallX - 8, cyT - 24);
+    ctx.textAlign = 'center';
+    ctx.fillText('保温层 · Q = 0', wallX - 16 + (maxLen + 64) / 2, cyT - 22);
+    ctx.textAlign = 'left';
     ctx.restore();
   }
 
   /* --- 热源（等温过程） --- */
   const isHot = cur.i === 0, isCold = cur.i === 2;
   if (isHot || isCold) {
-    const bx = wallX - 10, bw = maxLen + 52, by = cyT + cyH + 26, bh = 42;
+    const bx = wallX - 10, bw = maxLen + 52, by = cyT + cyH + 26, bh = 60;
     const grd = ctx.createLinearGradient(bx, by, bx, by + bh);
     if (isHot) { grd.addColorStop(0, 'rgba(239,68,68,.85)'); grd.addColorStop(1, 'rgba(154,24,24,.9)'); }
     else       { grd.addColorStop(0, 'rgba(59,130,246,.85)'); grd.addColorStop(1, 'rgba(30,58,138,.9)'); }
@@ -677,8 +679,9 @@ function drawPiston(now, dt) {
     ctx.strokeStyle = isHot ? '#fca5a5' : '#93c5fd'; ctx.lineWidth = 1.5;
     roundRect(ctx, bx, by, bw, bh, 10); ctx.stroke();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 13px "Segoe UI",sans-serif';
-    ctx.fillText(isHot ? `高温热源 Tₕ = ${P.Th} K（恒温热库）` : `低温热源 T𝒸 = ${P.Tc} K（恒温热库）`, bx + 12, by + 26);
-    /* 热量传递箭头 */
+    ctx.fillText(isHot ? `高温热源 Tₕ = ${P.Th} K（恒温热库）` : `低温热源 Tc = ${P.Tc} K（恒温热库）`, bx + 12, by + 24);
+    ctx.fillStyle = isHot ? '#fdba74' : '#67e8f9'; ctx.font = 'italic 13px "Times New Roman",serif';
+    ctx.fillText(isHot ? `本过程吸热 Qₕ = +${ST.Qh.toFixed(0)} J` : `本过程放热 Qc = ${ST.Qc.toFixed(0)} J`, bx + 12, by + 46);
     const nA = 5;
     for (let k = 0; k < nA; k++) {
       const ax = bx + bw * (k + 0.5) / nA;
@@ -694,8 +697,6 @@ function drawPiston(now, dt) {
       ctx.moveTo(ax, y1); ctx.lineTo(ax - 5, y1 + 8 * ah * -1 + 0); ctx.lineTo(ax + 5, y1 + 8 * ah * -1);
       ctx.closePath(); ctx.fill();
     }
-    ctx.fillStyle = isHot ? '#fdba74' : '#67e8f9'; ctx.font = 'italic 13px "Times New Roman",serif';
-    ctx.fillText(isHot ? `Qₕ = +${ST.Qh.toFixed(0)} J（吸热）` : `Q𝒸 = ${ST.Qc.toFixed(0)} J（放热）`, bx + 12, by - 8);
   }
 
   /* --- 气缸壁 --- */
@@ -707,7 +708,7 @@ function drawPiston(now, dt) {
   ctx.stroke();
 
   /* --- 气体分子 --- */
-  const spd = 0.028 * Math.sqrt(cur.T / 300) * (speed > 0 ? 1 : 1);
+  const spd = playing ? 0.028 * Math.sqrt(cur.T / 300) : 0; /* 暂停时分子冻结 */
   const tN = Math.min(Math.max((cur.T - P.Tc) / (P.Th - P.Tc), 0), 1);
   for (const pt of parts) {
     pt.x += pt.vx * spd * dt * 0.06; pt.y += pt.vy * spd * dt * 0.06;
@@ -734,9 +735,14 @@ function drawPiston(now, dt) {
   ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1;
   ctx.strokeRect(pistX + 20, cyT + cyH / 2 - 7, w - pistX - 26, 14);
 
-  /* --- 体积标注 --- */
-  ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.font = '12px "Segoe UI",sans-serif';
-  ctx.fillText(`V = ${cur.V.toFixed(2)} L`, wallX + 6, cyT + cyH + 20);
+  /* --- 体积标注（气缸内左下角，避开热量箭头） --- */
+  const vTxt = `V = ${cur.V.toFixed(2)} L`;
+  ctx.font = '12px "Segoe UI",sans-serif';
+  const vw = ctx.measureText(vTxt).width + 14;
+  ctx.fillStyle = 'rgba(8,12,28,.72)';
+  roundRect(ctx, wallX + 8, cyT + cyH - 32, vw, 22, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.8)';
+  ctx.fillText(vTxt, wallX + 15, cyT + cyH - 17);
 
   /* --- 顶部：温度指示条 --- */
   const tbX = wallX, tbW = maxLen + 30, tbY = 52;
@@ -812,21 +818,22 @@ function updateVerify() {
     <td><span class="chip ok">η = ${((1 + ST.Qc / ST.Qh) * 100).toFixed(1)}% = ${((1 - P.Tc / P.Th) * 100).toFixed(1)}%</span></td>
   </tr>`;
   tb.innerHTML = rows;
-  $('vParams').textContent = `Tₕ=${P.Th} K，T𝒸=${P.Tc} K，V₂/V₁=${P.r.toFixed(1)}，n=1 mol，γ=1.4`;
+  $('vParams').textContent = `Tₕ=${P.Th} K，Tc=${P.Tc} K，V₂/V₁=${P.r.toFixed(1)}，n=1 mol，γ=1.4`;
 }
 
 /* ============================================================
    主循环
    ============================================================ */
-let lastT = performance.now();
+let lastT = performance.now(), simNow = 0;
 function loop(now) {
   const dt = Math.min(now - lastT, 50); lastT = now;
   if (playing) {
+    simNow += dt;                          /* 暂停时动画时钟冻结 */
     phase += PHASE_RATE * speed * dt / 1000;
     if (phase >= 4) phase -= 4;
   }
   drawPV(now);
-  drawPiston(now, dt);
+  drawPiston(simNow, dt);
   updatePanel();
   requestAnimationFrame(loop);
 }
@@ -845,7 +852,7 @@ $('btnStep').addEventListener('click', () => {
 $('btnReset').addEventListener('click', () => { phase = 0; });
 $('sSpd').addEventListener('input', e => {
   speed = e.target.value / 100;
-  $('vSpd').textContent = speed.toFixed(2).replace(/\.?0+$/, '') + '×';
+  $('vSpd').textContent = parseFloat(speed.toFixed(2)) + '×';
 });
 
 function bindParam(id, vid, fmt, apply) {
