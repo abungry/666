@@ -2182,3 +2182,49 @@ function showItineraryModal(places) {
 function toggleItinerary() {
     document.getElementById('itinerary-modal').classList.toggle('show');
 }
+
+// ===== App 安装/下载 =====
+// beforeinstallprompt：Chrome/Edge 支持时捕获系统安装提示
+let pwaDeferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    pwaDeferredPrompt = e;
+});
+
+function isMobileUA() {
+    return /Android|iPhone|iPad|HarmonyOS/i.test(navigator.userAgent);
+}
+
+function installOrDownloadApp() {
+    // 1. 手机端优先处理：安卓无条件直接下载 APK（国产浏览器可能触发 beforeinstallprompt
+    //    但弹不出安装框，必须先于 PWA 分支判断）；iPhone 给 Safari 指引
+    if (isMobileUA()) {
+        if (/iPhone|iPad/i.test(navigator.userAgent)) {
+            showToast('请用 Safari 打开 → 分享按钮 →「添加到主屏幕」', 'info');
+        } else {
+            // 国产浏览器内核会拦截合成 a.click() 下载，改用 location.href 真实跳转：
+            // 服务器返回的 Content-Type 无法展示，跳转会自动转为下载
+            showToast('开始下载安卓安装包，下载完成后点击安装即可', 'success');
+            setTimeout(() => { window.location.href = 'SpatialAICompanion.apk'; }, 300);
+        }
+        return;
+    }
+    // 2. 电脑端：支持原生 PWA 安装的浏览器（Edge/Chrome）→ 弹系统安装框
+    if (pwaDeferredPrompt) {
+        pwaDeferredPrompt.prompt();
+        pwaDeferredPrompt.userChoice.then(choice => {
+            if (choice.outcome === 'accepted') showToast('正在安装到桌面…', 'success');
+            pwaDeferredPrompt = null;
+        });
+        return;
+    }
+    // 3. 电脑端不支持 PWA → 下载 Windows 安装包
+    const a = document.createElement('a');
+    a.href = 'SpatialAICompanion_Setup_2.0.0.exe';
+    a.download = 'SpatialAICompanion_Setup_2.0.0.exe';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('开始下载 Windows 安装包（81MB），双击即可安装', 'success');
+}
+

@@ -36,6 +36,8 @@ const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
 
 const MIME_TYPES = {
     '.html': 'text/html; charset=utf-8',
+    '.exe': 'application/octet-stream',
+    '.apk': 'application/vnd.android.package-archive',
     '.css': 'text/css; charset=utf-8',
     '.js': 'text/javascript; charset=utf-8',
     '.json': 'application/json; charset=utf-8',
@@ -910,7 +912,8 @@ const server = http.createServer(async (req, res) => {
     serveStatic(req, res);
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+// 绑定 0.0.0.0：本机 127.0.0.1 与局域网手机都能访问
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Spatial AI Companion: http://127.0.0.1:${PORT}`);
     console.log(`DeepSeek: ${configuredKey('DEEPSEEK_API_KEY') ? `已配置（${DEEPSEEK_MODEL}）` : '未配置，将使用前端本地降级推荐'}`);
 });

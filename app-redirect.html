@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 作者：周梓润 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>空间伴侣</title>
+    <meta name="theme-color" content="#0f1226">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            background: #0f1226;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+        }
+        /* 动态渐变背景 */
+        .bg {
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, .45), transparent 55%),
+                radial-gradient(circle at 80% 30%, rgba(6, 182, 212, .35), transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(139, 92, 246, .30), transparent 55%),
+                #0f1226;
+            animation: breathe 8s ease-in-out infinite alternate;
+        }
+        @keyframes breathe {
+            0%   { transform: scale(1)   rotate(0deg);   opacity: .9; }
+            100% { transform: scale(1.15) rotate(6deg);  opacity: 1;  }
+        }
+        .wrap {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 26px;
+            padding: 24px;
+            text-align: center;
+            color: #fff;
+        }
+        .logo {
+            width: 104px; height: 104px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 18px 46px rgba(99, 102, 241, .5), 0 0 0 1px rgba(255,255,255,.14) inset;
+            animation: float 3.2s ease-in-out infinite;
+        }
+        .logo svg { width: 54px; height: 54px; fill: none; stroke: #fff; stroke-width: 2.2; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-9px); }
+        }
+        h1 {
+            font-size: 23px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            background: linear-gradient(135deg, #c7d2fe, #67e8f9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            font-size: 13.5px;
+            color: rgba(226, 232, 240, .62);
+            line-height: 1.7;
+            max-width: 280px;
+        }
+        /* 加载条 */
+        .bar {
+            width: 168px; height: 3px;
+            border-radius: 3px;
+            background: rgba(255,255,255,.12);
+            overflow: hidden;
+        }
+        .bar span {
+            display: block;
+            width: 40%; height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #6366f1, #06b6d4, #8b5cf6);
+            background-size: 200% 100%;
+            animation: slide 1.25s ease-in-out infinite;
+        }
+        @keyframes slide {
+            0%   { transform: translateX(-110%); }
+            100% { transform: translateX(320%); }
+        }
+        /* 失败状态 */
+        .fail { display: none; flex-direction: column; align-items: center; gap: 18px; }
+        .fail.show { display: flex; }
+        .fail .icon {
+            width: 66px; height: 66px; border-radius: 50%;
+            background: rgba(248, 113, 113, .14);
+            border: 1px solid rgba(248, 113, 113, .4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+        }
+        .fail p { font-size: 14px; color: rgba(226, 232, 240, .78); line-height: 1.75; max-width: 300px; }
+        .retry {
+            margin-top: 6px;
+            padding: 12px 34px;
+            border: none;
+            border-radius: 999px;
+            font-size: 14.5px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            box-shadow: 0 10px 26px rgba(99, 102, 241, .42);
+            cursor: pointer;
+            transition: transform .18s ease;
+        }
+        .retry:active { transform: scale(.94); }
+        .tip { font-size: 11.5px; color: rgba(148, 163, 184, .55); margin-top: 4px; }
+        .loading.hide { display: none; }
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+    <div class="wrap">
+        <!-- 加载中 -->
+        <div class="loading" id="loading" style="display:flex;flex-direction:column;align-items:center;gap:26px;">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="8"></circle>
+                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                </svg>
+            </div>
+            <h1>空间伴侣</h1>
+            <div class="bar"><span></span></div>
+            <p class="sub">正在连接服务器…</p>
+        </div>
+
+        <!-- 连接失败 -->
+        <div class="fail" id="fail">
+            <div class="icon">⚠️</div>
+            <h1 style="font-size:19px;">暂时连不上服务器</h1>
+            <p>演示用的服务器需要保持开机运行。<br>请确认电脑已打开，然后点击重试。</p>
+            <button class="retry" onclick="retry()">重新连接</button>
+            <div class="tip" id="failTip"></div>
+        </div>
+    </div>
+
+    <script>
+        // 兜底地址：与 app-target.json 保持一致，防止 JSON 拉取失败时无法跳转
+        var FALLBACK_URL = 'https://c0381bd.r15.vip.cpolar.cn/';
+        var TIMEOUT = 9000;
+        var hasRedirected = false;
+
+        function go(url) {
+            if (hasRedirected) return;
+            hasRedirected = true;
+            location.replace(url);
+        }
+
+        function showFail(detail) {
+            document.getElementById('loading').classList.add('hide');
+            document.getElementById('fail').classList.add('show');
+            if (detail) document.getElementById('failTip').textContent = detail;
+        }
+
+        // 带超时的探测：no-cors 模式能区分「网络不通」和「能连上」
+        function probe(url) {
+            var ctrl = new AbortController();
+            var timer = setTimeout(function () { ctrl.abort(); }, TIMEOUT);
+            return fetch(url, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal })
+                .then(function () { clearTimeout(timer); return true; })
+                .catch(function () { clearTimeout(timer); return false; });
+        }
+
+        // 读取最新隧道地址（加时间戳绕过 CDN 缓存）
+        function loadTarget() {
+            var ctrl = new AbortController();
+            var timer = setTimeout(function () { ctrl.abort(); }, TIMEOUT);
+            return fetch('app-target.json?t=' + Date.now(), { cache: 'no-store', signal: ctrl.signal })
+                .then(function (r) { clearTimeout(timer); return r.json(); })
+                .then(function (data) { return (data && data.url) || FALLBACK_URL; })
+                .catch(function () { clearTimeout(timer); return FALLBACK_URL; });
+        }
+
+        function connect() {
+            hasRedirected = false;
+            document.getElementById('loading').classList.remove('hide');
+            document.getElementById('fail').classList.remove('show');
+
+            loadTarget().then(function (url) {
+                return probe(url).then(function (ok) {
+                    if (ok) { go(url); }
+                    else { showFail('目标地址：' + url); }
+                });
+            });
+        }
+
+        function retry() { connect(); }
+
+        connect();
+    </script>
+</body>
+</html>
