@@ -1,4 +1,4 @@
-﻿/* 作者：周梓润 */
+/* 作者：周梓润 */
 /* ============================================================
    Spatial AI Companion - 欢迎引导页面
    ============================================================ */
@@ -14,18 +14,36 @@ function showToast(msg, type = 'info') {
     setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-/* -------- 获取登录用户 -------- */
+/* -------- 获取登录用户（免登录模式自动创建随机访客 ID） -------- */
+// 与 main.js 保持一致：每个浏览器独立随机 ID，作为云端行级隔离依据
+function newGuestId() {
+    try {
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        return 'u' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+        return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 14);
+    }
+}
 function getCurrentUser() {
-    try { return JSON.parse(localStorage.getItem('sac_current_user')); }
-    catch { return null; }
+    let u = null;
+    try { u = JSON.parse(localStorage.getItem('sac_current_user')); } catch {}
+    if (u && typeof u.id === 'string' && u.id && u.id !== 'SAC_GUEST') return u;
+    const id = newGuestId();
+    const guest = { id, username: (u && u.username) || '探索者', phone: (u && u.phone) || '' };
+    try {
+        localStorage.setItem('sac_current_user', JSON.stringify(guest));
+        const done = JSON.parse(localStorage.getItem('sac_onboarding_done') || '{}');
+        if (done['SAC_GUEST']) {
+            done[id] = true;
+            delete done['SAC_GUEST'];
+            localStorage.setItem('sac_onboarding_done', JSON.stringify(done));
+        }
+    } catch {}
+    return guest;
 }
 
 let currentUser = getCurrentUser();
-if (!currentUser) {
-    // 免登录模式：自动创建访客身份，继续走引导流程（不踢回主页）
-    currentUser = { id: 'SAC_GUEST', username: '探索者', phone: '' };
-    localStorage.setItem('sac_current_user', JSON.stringify(currentUser));
-}
 
 /* -------- 用户资料 -------- */
 const userProfile = {

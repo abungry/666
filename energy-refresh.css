@@ -1,0 +1,309 @@
+/* Energy planner — journey screen refresh: original mascot 小途, cleaner stops, stat grid, CTA */
+
+:root { --e-spring: cubic-bezier(0.34, 1.45, 0.64, 1); }
+
+/* ==================== Scene ==================== */
+.route-canvas { height: 300px; }
+.rc-hill { background: radial-gradient(ellipse at center, rgba(224, 122, 61, 0.14), transparent 70%); }
+.rc-path { stroke: rgba(255, 255, 255, 0.26); stroke-width: 2.6; }
+.rc-path-glow { stroke: #e07a3d; opacity: 0.1; }
+
+/* ==================== Stops ==================== */
+.stop-bubble {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.18), transparent 60%),
+        rgba(10, 22, 38, 0.82);
+    box-shadow: 0 0 0 2px var(--sc-ring2), 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+.stop-bubble::after { top: 50%; width: 50px; height: 50px; }
+.stop-emoji {
+    width: 44px; height: 44px;
+    margin-top: -12px;
+    filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.45));
+}
+.stop-node:hover .stop-bubble { transform: translateY(-3px) scale(1.08); }
+.stop-node.current .stop-bubble {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 2.5px #f0c19a, 0 0 22px rgba(224, 122, 61, 0.55), 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+.stop-node.current .stop-emoji { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.5)); }
+.stop-node.current::before {
+    content: '下一站';
+    position: absolute;
+    left: 50%; top: -30px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #e07a3d, #c45c26);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(196, 92, 38, 0.4);
+    transform: translateX(-50%);
+    animation: nextTagBob 1.6s ease-in-out infinite;
+    z-index: 8;
+}
+@keyframes nextTagBob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+.stop-idx {
+    position: absolute;
+    top: -3px; left: -3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #f0f7fb;
+    color: #0b1522;
+    font-size: 10px;
+    font-weight: 900;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+}
+.stop-node.passed .stop-idx {
+    background: #e07a3d;
+    color: transparent;
+}
+.stop-node.passed .stop-idx::after {
+    content: '✓';
+    position: absolute;
+    color: #fff;
+    font-size: 11px;
+}
+.stop-node.passed .stop-bubble { opacity: 0.6; box-shadow: 0 0 0 2px rgba(224, 122, 61, 0.5), 0 6px 14px rgba(0, 0, 0, 0.35); }
+
+.stop-cost {
+    margin-top: 6px;
+    padding: 2px 7px;
+    font-size: 9.5px;
+    background: rgba(7, 15, 26, 0.82);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Branch previews: small, quiet fork markers instead of dashed boxes */
+.stop-node.branch-choice .stop-idx { display: none; }
+.stop-node.branch-choice.preview {
+    opacity: 0.32;
+    pointer-events: none;
+}
+.stop-node.branch-choice.preview .stop-bubble {
+    transform: scale(0.42);
+    border: none;
+    filter: saturate(0.25) grayscale(0.2);
+    box-shadow: none;
+    outline: none;
+    background: transparent;
+}
+.stop-node.branch-choice.preview .branch-hint,
+.stop-node.branch-choice.preview .stop-cost { display: none; }
+.stop-node.branch-choice.active .stop-bubble {
+    transform: scale(0.9);
+    border: none;
+    box-shadow: 0 0 0 2.5px #fbbf24, 0 0 18px rgba(251, 191, 36, 0.6);
+}
+.stop-node.branch-choice.active:hover .stop-bubble { transform: scale(1.02); }
+
+.to-label {
+    padding: 3px 9px;
+    font-size: 9.5px;
+    background: rgba(7, 15, 26, 0.8);
+    border-color: rgba(240, 193, 154, 0.35);
+}
+
+/* ==================== Mascot 小途 ==================== */
+.walker { transform: translate(-50%, -88%); }
+.walker.pathing { transition: none; }
+.w-aura {
+    width: 70px; height: 70px;
+    background: radial-gradient(circle, rgba(224, 122, 61, 0.28) 0%, transparent 70%);
+}
+.walker-body { width: 68px; height: 84px; }
+.walker.face-left .walker-body .w-svg { transform: scaleX(-1); }
+
+.walker .walker-body { animation: tuIdle 2.6s ease-in-out infinite; animation-play-state: running; }
+.walker.walking .walker-body { animation: tuHop 0.38s ease-in-out infinite; }
+.walker.tired.walking .walker-body { animation-duration: 0.7s; }
+.walker.cheer .walker-body { animation: cheerJump 0.5s var(--e-spring) 2; }
+@keyframes tuIdle {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    50% { transform: translateY(-2px) scale(1.02, 0.98); }
+}
+@keyframes tuHop {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-6px) rotate(3deg); }
+}
+
+.w-svg .ws-hat {
+    transform-box: fill-box;
+    transform-origin: 40px 17px;
+    animation: sproutSway 2.2s ease-in-out infinite;
+}
+.walker.walking .w-svg .ws-hat { animation-duration: 0.38s; }
+@keyframes sproutSway {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(8deg); }
+}
+
+.w-svg .ws-eye-tired,
+.w-svg .ws-sweat { opacity: 0; }
+.walker.tired .ws-eye { opacity: 0; }
+.walker.tired .ws-eye-tired { opacity: 1; }
+.walker.tired .ws-sweat { animation: sweatDrop 1.3s ease-in infinite; }
+.walker.tired .ws-hat { animation: none; transform: rotate(32deg); }
+.walker.tired .ws-smile { transform: scaleY(-1); transform-box: fill-box; transform-origin: center; }
+.walker.tired::after { content: none; }
+@keyframes sweatDrop {
+    0% { opacity: 0; transform: translateY(-2px); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(8px); }
+}
+
+.walker.cheer .ws-eye { animation: none; transform: scaleY(0.35); }
+
+/* Dust puffs while walking */
+.w-dust {
+    position: absolute;
+    left: 50%; bottom: 2px;
+    width: 40px; height: 12px;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+.w-dust span {
+    position: absolute;
+    bottom: 0;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    opacity: 0;
+}
+.w-dust span:nth-child(1) { left: 4px; }
+.w-dust span:nth-child(2) { left: 16px; animation-delay: 0.13s !important; }
+.w-dust span:nth-child(3) { left: 28px; animation-delay: 0.26s !important; }
+.walker.walking .w-dust span { animation: dustPuff 0.4s ease-out infinite; }
+.walker.face-left .w-dust { transform: translateX(-50%) scaleX(-1); }
+@keyframes dustPuff {
+    0% { opacity: 0.7; transform: translate(0, 0) scale(0.5); }
+    100% { opacity: 0; transform: translate(-10px, -6px) scale(1.4); }
+}
+
+/* Mini mascot in the hearts header */
+.hh-char {
+    background: rgba(224, 122, 61, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(224, 122, 61, 0.3);
+    overflow: hidden;
+}
+.hh-char .w-svg.mini { width: 28px; height: 35px; margin-top: 4px; }
+
+/* ==================== Now-stop card ==================== */
+.now-stop {
+    border-radius: 20px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(148, 197, 220, 0.14);
+}
+.now-stop::before { display: none; }
+.ns-head { gap: 14px; align-items: flex-start; }
+.ns-ico {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: rgba(10, 22, 38, 0.8);
+    box-shadow: inset 0 0 0 1.5px var(--sc-glow);
+}
+.ns-ico img { width: 42px; height: 42px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45)); }
+.ns-kicker {
+    margin-bottom: 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #f0c19a;
+    letter-spacing: 0.02em;
+}
+.ns-info h4 { font-size: 17px; letter-spacing: -0.01em; }
+.ns-info p { font-size: 12px; }
+
+.ns-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+}
+.ns-stat {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 10px 9px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(148, 197, 220, 0.1);
+    color: #fff;
+}
+.ns-stat i { font-size: 11px; color: #8fa6bb; margin-bottom: 4px; }
+.ns-stat b { font-size: 15px; font-weight: 800; line-height: 1.1; }
+.ns-stat span { font-size: 10px; font-weight: 600; color: #8fa6bb; }
+.ns-stat.cost { border-color: rgba(251, 113, 133, 0.28); }
+.ns-stat.cost i, .ns-stat.cost b { color: #fb7185; }
+.ns-stat.rec { border-color: rgba(134, 239, 172, 0.3); }
+.ns-stat.rec i, .ns-stat.rec b { color: #f0c19a; }
+
+/* ==================== Actions ==================== */
+.action-row {
+    position: sticky;
+    bottom: 0;
+    z-index: 8;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 10px 0 6px;
+    background: linear-gradient(180deg, transparent, rgba(10, 22, 38, 0.92) 28%);
+}
+.act-btn.go {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px 16px 12px 12px;
+    border-radius: 18px;
+    text-align: left;
+    background: linear-gradient(135deg, #e07a3d, #c45c26);
+    box-shadow: 0 10px 26px rgba(196, 92, 38, 0.35);
+    transition: transform 0.2s var(--e-spring), box-shadow 0.2s ease;
+}
+.act-btn.go:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(196, 92, 38, 0.45); }
+.act-btn.go:active { transform: scale(0.97); }
+.ab-ico {
+    width: 40px; height: 40px;
+    flex-shrink: 0;
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 17px;
+}
+.ab-text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ab-text > span { font-size: 15px; font-weight: 800; }
+.ab-text small { font-size: 10.5px; opacity: 0.85; }
+.ab-go { font-size: 14px; opacity: 0.9; transition: transform 0.2s ease; }
+.act-btn.go:hover .ab-go { transform: translateX(3px); }
+
+.act-btn.replan {
+    width: 96px;
+    gap: 6px;
+    justify-content: center;
+    border-radius: 18px;
+    background: rgba(240, 198, 116, 0.1);
+    border: 1px solid rgba(240, 198, 116, 0.35);
+    color: #fde68a;
+    font-size: 12.5px;
+}
+.act-btn.replan i { font-size: 17px; }
+.act-btn.replan:hover { background: rgba(240, 198, 116, 0.18); }
+
+/* ==================== Advice card ==================== */
+.advice-card {
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(251, 113, 133, 0.12), rgba(240, 198, 116, 0.08));
+}
+.advice-card.ok { background: linear-gradient(135deg, rgba(224, 122, 61, 0.12), rgba(232, 196, 168, 0.08)); }
+
+@media (max-width: 480px) {
+    .ns-stats { grid-template-columns: repeat(2, 1fr); }
+}

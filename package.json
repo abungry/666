@@ -3,12 +3,72 @@
   "version": "2.0.0",
   "private": true,
   "description": "带用户记忆库、地图检索与 DeepSeek 推荐的旅行助手",
+  "author": "周梓润",
+  "main": "electron/main.js",
   "scripts": {
     "start": "node server.js",
+    "config": "node server.js --check-config",
+    "app": "electron .",
+    "dist": "electron-builder --win nsis",
     "check": "node --check server.js && node --check main.js && node --check welcome.js && node --check energy.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "cn.zhouzirun.spatial-ai-companion",
+    "productName": "Spatial AI Companion",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+        "electron/**/*",
+      "server.js",
+      "index.html",
+      "main.html",
+      "main.css",
+      "main.js",
+      "manifest.json",
+      "sw.js",
+      "theme.css",
+      "refresh.css",
+      "welcome.html",
+      "welcome.css",
+      "welcome.js",
+      "energy.css",
+      "energy.js",
+      "energy-refresh.css",
+      "look.css",
+      "beijing_places.js",
+      "beijing_places_extended.js",
+      "icons/**/*",
+      "assets/**/*",
+      "paimon*.png",
+      "companion.js",
+      "companion.css",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "空间伴侣"
+    }
   }
 }
-

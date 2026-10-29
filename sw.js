@@ -1,6 +1,6 @@
-// Service Worker：静态资源缓存，API 请求不走缓存
+﻿﻿﻿﻿// Service Worker：静态资源缓存，API 请求不走缓存
 // 作者：周梓润
-const CACHE_NAME = 'sac-static-v2';
+const CACHE_NAME = 'sac-static-v16';
 const STATIC_ASSETS = [
     './',
     'index.html',
@@ -9,6 +9,8 @@ const STATIC_ASSETS = [
     'main.js',
     'theme.css',
     'refresh.css',
+    'companion.css',
+    'companion.js',
     'welcome.html',
     'welcome.css',
     'welcome.js',
@@ -18,6 +20,27 @@ const STATIC_ASSETS = [
     'look.css',
     'beijing_places.js',
     'beijing_places_extended.js',
+    'assets/companion/companion_normal.png',
+    'assets/companion/companion_shy.png',
+    'assets/companion/companion_happy.png',
+    'assets/companion/xingye_normal.png',
+    'assets/companion/xingye_shy.png',
+    'assets/companion/xingye_happy.png',
+    'assets/companion/fengling_normal.png',
+    'assets/companion/fengling_shy.png',
+    'assets/companion/fengling_happy.png',
+    'assets/companion/mengdie_normal.png',
+    'assets/companion/mengdie_shy.png',
+    'assets/companion/mengdie_happy.png',
+    'assets/companion/lanyin_normal.png',
+    'assets/companion/lanyin_shy.png',
+    'assets/companion/lanyin_happy.png',
+    'assets/companion/hiyori_normal.png',
+    'assets/live2d/lib/pixi.min.js',
+    'assets/live2d/lib/live2dcubismcore.min.js',
+    'assets/live2d/lib/pixi-live2d-cubism4.min.js',
+    'assets/live2d/hiyori/Hiyori.model3.json',
+    'assets/live2d/hiyori/Hiyori.moc3',
     'icons/icon-192.png',
     'icons/icon-512.png',
     'manifest.json'
@@ -48,17 +71,16 @@ self.addEventListener('fetch', event => {
     // 跨域资源（CDN、瓦片）不拦截，交给浏览器
     if (url.origin !== self.location.origin) return;
 
-    // 同源静态资源：缓存优先，后台静默更新
+    // 同源静态资源：网络优先（始终拿到最新代码），断网时回退缓存
     event.respondWith(
-        caches.match(event.request).then(cached => {
-            const networkFetch = fetch(event.request).then(response => {
-                if (response && response.ok) {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-                }
-                return response;
-            }).catch(() => cached);
-            return cached || networkFetch;
-        })
+        fetch(event.request).then(response => {
+            if (response && response.ok) {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            }
+            return response;
+        }).catch(() =>
+            caches.match(event.request).then(cached => cached || Response.error())
+        )
     );
 });

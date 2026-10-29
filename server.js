@@ -29,6 +29,38 @@ function configuredKey(name) {
     return value;
 }
 
+/* ==================== 配置体检：密钥轮换后用 `npm run config` 确认是否全部生效 ==================== */
+const ENV_CHECKS = [
+    { key: 'DEEPSEEK_API_KEY', label: 'DeepSeek AI 推荐与对话', required: true, source: 'platform.deepseek.com' },
+    { key: 'AMAP_WEB_KEY', label: '高德 POI 搜索 / 路径规划', required: true, source: 'lbs.amap.com' },
+    { key: 'TIANDITU_KEY', label: '天地图地形 / 影像图层', required: true, source: 'lbs.tianditu.gov.cn' },
+    { key: 'QWEATHER_KEY', label: '和风天气', required: true, source: 'console.qweather.com' },
+    { key: 'SUPABASE_URL', label: 'Supabase 项目地址', required: true, source: 'supabase.com' },
+    { key: 'SUPABASE_ANON_KEY', label: 'Supabase 访客存储密钥', required: true, source: 'supabase.com' },
+    { key: 'BAIDU_MAP_AK', label: '百度地图对比检索', required: false, source: 'lbsyun.baidu.com' }
+];
+
+function printEnvReport() {
+    console.log('=== 配置体检（来源：.env 或系统环境变量）===');
+    let missing = 0;
+    for (const item of ENV_CHECKS) {
+        const ok = Boolean(configuredKey(item.key));
+        if (!ok && item.required) missing += 1;
+        if (ok) {
+            console.log(`  ✓ ${item.label}`);
+        } else if (item.required) {
+            console.log(`  ✗ ${item.label}  ← 缺失，去 ${item.source} 重新申请`);
+        } else {
+            console.log(`  - ${item.label}  （可选，未配置）`);
+        }
+    }
+    if (missing > 0) {
+        console.log(`\n警告：${missing} 项必需配置缺失，对应功能会降级或报错。请参照 .env.example 填写后重启。`);
+    } else {
+        console.log('\n全部必需配置已就绪。');
+    }
+}
+
 const PORT = Number(process.env.PORT) || 3000;
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-flash';
 const DEEPSEEK_ANALYSIS_MODEL = process.env.DEEPSEEK_ANALYSIS_MODEL || 'deepseek-flash';
@@ -45,7 +77,8 @@ const MIME_TYPES = {
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon'
+    '.ico': 'image/x-icon',
+    '.moc3': 'application/octet-stream'
 };
 
 function json(res, status, body) {
@@ -112,9 +145,14 @@ function normalizeInput(body) {
             ? body.userSignals.favorites.slice(0, 30).map(item => cleanText(item, 60)).filter(Boolean)
             : []
     };
+    // 看板娘人格：前端当前选择的桌面伙伴
+    const companion = {
+        name: cleanText(body.companion?.name || '星旅', 12) || '星旅',
+        tag: cleanText(body.companion?.tag || '猫耳向导', 16) || '猫耳向导'
+    };
     if (mode === 'chat' && !query) throw new Error('请输入想搜索或推荐的内容');
     if (mode === 'direct' && !memory.length) throw new Error('记忆库为空，无法直接推荐');
-    return { mode, query, memory, localCandidates, location, history, userSignals };
+    return { mode, query, memory, localCandidates, location, history, userSignals, companion };
 }
 
 async function searchOpenStreetMap(input, understanding) {
@@ -331,7 +369,9 @@ async function analyzeUserRequest(input) {
     };
 }
 
-function buildRecommendationPrompt() {
+function buildRecommendationPrompt(companion) {
+    const name = companion?.name || '星旅';
+    const tag = companion?.tag || '猫耳向导';
     return `你是严谨、懂取舍的个性化旅行顾问。你已经收到经过结构化理解的需求和真实候选地点，现在负责精排并解释。
 
 排序原则（从高到低）：
@@ -343,14 +383,17 @@ function buildRecommendationPrompt() {
 6. 地点名称只能原样取自 candidates，通常推荐 3 个、最多 5 个。普通闲聊可返回空 recommendations。
 7. 回复要自然、具体，避免“综合匹配度高”这类空话。第一名必须明确说明为什么胜过第二名。
 8. text 中提到的地点、数量和顺序必须与 recommendations 完全一致，不能在文字里推荐却漏掉卡片。
-9. 只输出 JSON：
-{"text":"先给明确结论，再用2-4句概括选择逻辑","recommendations":[{"name":"候选点原名","reason":"具体匹配理由","personalization":"命中了哪些本次需求或记忆","tradeoff":"需要注意的取舍","bestTime":"有依据时给建议，否则留空","confidence":0.0}]}`;
+9. 你同时住在用户桌面角落，是用户的看板伙伴「${name}」（人设：${tag}）。请在输出中额外给出两个字段：
+   - "mood"：你此刻的情绪，只能从 normal / happy / excited / shy / thinking 中选一个。推荐自信且结果好时用 happy 或 excited；结果不理想、需要用户放宽条件或回答不确定时用 shy；普通陈述用 normal；闲聊轻松时用 happy。
+   - "companionLine"：一句不超过 24 个字的第一人称陪伴台词，口语化、有情绪价值，不能复述 text 的内容，例如“第一名我超想陪你去的！”或“这次选择一般般，别嫌弃我呀”。
+10. 只输出 JSON：
+{"text":"先给明确结论，再用2-4句概括选择逻辑","mood":"normal","companionLine":"一句陪伴台词","recommendations":[{"name":"候选点原名","reason":"具体匹配理由","personalization":"命中了哪些本次需求或记忆","tradeoff":"需要注意的取舍","bestTime":"有依据时给建议，否则留空","confidence":0.0}]}`;
 }
 
 async function rankAndAnswer(input, understanding, candidates) {
     return requestDeepSeek({
         model: DEEPSEEK_MODEL,
-        system: buildRecommendationPrompt(),
+        system: buildRecommendationPrompt(input.companion),
         payload: {
             mode: input.mode,
             understanding,
@@ -419,8 +462,11 @@ function normalizeModelResult(result, candidates, understanding) {
             source: candidate.source
         })));
     }
+    const allowedMoods = new Set(['normal', 'happy', 'excited', 'shy', 'thinking']);
     return {
         text: cleanText(result.text || `我理解你想要的是：${understanding.resolvedNeed}。以下是更适合你的选择。`, 1000),
+        mood: allowedMoods.has(result.mood) ? result.mood : 'normal',
+        companionLine: cleanText(result.companionLine, 40),
         keywords: understanding.memoryUpdates.map(item => item.keyword),
         memoryUpdates: understanding.memoryUpdates,
         understanding: {
@@ -912,8 +958,14 @@ const server = http.createServer(async (req, res) => {
     serveStatic(req, res);
 });
 
+// 只做配置体检不启动服务：npm run config
+if (process.argv.includes('--check-config')) {
+    printEnvReport();
+    process.exit(0);
+}
+
 // 绑定 0.0.0.0：本机 127.0.0.1 与局域网手机都能访问
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Spatial AI Companion: http://127.0.0.1:${PORT}`);
-    console.log(`DeepSeek: ${configuredKey('DEEPSEEK_API_KEY') ? `已配置（${DEEPSEEK_MODEL}）` : '未配置，将使用前端本地降级推荐'}`);
+    printEnvReport();
 });

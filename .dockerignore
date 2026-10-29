@@ -1,0 +1,11 @@
+# 作者：周梓润
+node_modules
+.git
+.gitignore
+tools
+dist
+logs
+*.log
+.env
+.env.*
+!.env.example

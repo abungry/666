@@ -1,0 +1,382 @@
+/* 作者：周梓润 */
+/* ============================================================
+   看板娘「星旅」- Spatial AI Companion 拟人形象
+   ============================================================ */
+
+.companion-widget {
+    position: fixed;
+    right: 18px;
+    bottom: 92px;
+    width: 118px;
+    z-index: 600;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none; /* 仅舞台区域可点，避免遮挡页面 */
+}
+
+/* 对话气泡 */
+.companion-bubble {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    min-width: 110px;
+    max-width: 180px;
+    padding: 8px 12px;
+    border-radius: 14px 14px 4px 14px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #4c1d95;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+    transform-origin: bottom right;
+    transition: opacity 0.25s ease, transform 0.25s var(--spring, ease);
+    pointer-events: none;
+}
+.companion-bubble.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* 角色舞台（贴纸卡片式） */
+.companion-stage {
+    position: relative;
+    width: 118px;
+    height: 158px;
+    border-radius: 22px;
+    overflow: visible;
+    cursor: grab;
+    touch-action: none; /* 允许拖拽，不触发页面滚动 */
+    pointer-events: auto;
+    transition: filter 0.25s ease;
+    animation: companion-alive 4.2s ease-in-out infinite;
+}
+.companion-stage:hover .companion-img {
+    filter: drop-shadow(0 16px 26px rgba(99, 102, 241, 0.5));
+}
+.companion-stage.dragging {
+    animation: none;
+    cursor: grabbing;
+}
+.companion-stage.dragging .companion-img {
+    filter: drop-shadow(0 22px 34px rgba(99, 102, 241, 0.55));
+}
+
+.companion-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 透明 PNG：完整显示人物，不裁剪 */
+    display: block;
+    pointer-events: none;
+    transform-origin: 50% 100%;
+    filter: drop-shadow(0 10px 18px rgba(99, 102, 241, 0.35));
+    transition: filter 0.25s ease;
+    animation: companion-breathe 2.8s ease-in-out infinite;
+}
+
+/* Live2D 画布（替换静态立绘） */
+.companion-live2d {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    filter: drop-shadow(0 10px 18px rgba(99, 102, 241, 0.35));
+}
+
+/* 角色切换按钮 */
+.companion-switch {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(99, 102, 241, 0.85);
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    opacity: 0.85;
+    transition: transform 0.25s var(--spring, ease), opacity 0.2s ease;
+}
+.companion-switch:hover { transform: rotate(120deg) scale(1.1); opacity: 1; }
+
+/* 聊天入口按钮（左上角） */
+.companion-chat-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(6, 182, 212, 0.85);
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    opacity: 0.85;
+    transition: transform 0.25s var(--spring, ease), opacity 0.2s ease;
+}
+.companion-chat-btn:hover { transform: scale(1.15); opacity: 1; }
+
+/* 直接对小人说话的输入条 */
+.companion-chat {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 216px;
+    padding: 6px 8px;
+    border-radius: 14px 14px 4px 14px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+    transform-origin: bottom right;
+    transition: opacity 0.25s ease, transform 0.25s var(--spring, ease);
+    pointer-events: none;
+    z-index: 6;
+}
+.companion-chat.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+.companion-chat-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4c1d95;
+}
+.companion-chat-input::placeholder { color: rgba(76, 29, 149, 0.45); }
+.companion-chat-send {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #06b6d4);
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s var(--spring, ease);
+}
+.companion-chat-send:hover { transform: scale(1.12); }
+.companion-chat-send:disabled { opacity: 0.5; cursor: wait; }
+
+/* 角色选择器 */
+.companion-picker {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 92px);
+    gap: 8px;
+    padding: 10px;
+    border-radius: 18px;
+    background: rgba(20, 18, 48, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 12px 36px rgba(20, 18, 48, 0.5);
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+    transform-origin: bottom right;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s var(--spring, ease);
+    z-index: 5;
+}
+.companion-picker.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+.companion-pick-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s var(--spring, ease);
+}
+.companion-pick-card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.12); }
+.companion-pick-card.active {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.18);
+}
+.companion-pick-card img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center 18%;
+    border-radius: 10px;
+    pointer-events: none;
+}
+.companion-pick-card .pick-name { color: #fff; font-size: 12px; font-weight: 700; }
+.companion-pick-card .pick-tag { color: rgba(255, 255, 255, 0.6); font-size: 9px; }
+.companion-pick-card .pick-tag .fa-mars { color: #67e8f9; }
+.companion-pick-card .pick-tag .fa-venus { color: #f9a8d4; }
+
+/* 名牌 */
+.companion-name {
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #6366f1, #06b6d4);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4);
+    pointer-events: none;
+}
+
+/* 戳一戳：压扁回弹 */
+.companion-stage.poked { animation: companion-squish 0.5s var(--spring, ease); }
+
+/* 开心状态：青色光环 */
+.companion-stage.happy {
+    box-shadow:
+        0 10px 28px rgba(6, 182, 212, 0.45),
+        0 0 0 5px rgba(16, 185, 129, 0.22);
+}
+
+/* 爱心 / 星星粒子 */
+.companion-particle {
+    position: absolute;
+    bottom: 55%;
+    font-size: 15px;
+    pointer-events: none;
+    animation: companion-particle-up 1.15s ease-out forwards;
+    z-index: 2;
+}
+
+/* 待机「活着」：大幅度浮动 + 重心摇摆（模拟头发/衣服随时间晃动） */
+@keyframes companion-alive {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-12px) rotate(4deg); }
+    50% { transform: translateY(-19px) rotate(0deg); }
+    75% { transform: translateY(-12px) rotate(-4deg); }
+}
+/* 呼吸节奏：胸口起伏感的纵向缩放，叠加左右重心摆动 */
+@keyframes companion-breathe {
+    0%, 100% { transform: translateX(0) scale(1, 1); }
+    25% { transform: translateX(3.5px) scale(0.994, 1.028); }
+    50% { transform: translateX(0) scale(0.985, 1.055); }
+    75% { transform: translateX(-3.5px) scale(0.994, 1.028); }
+}
+/* 待机小跳：跳起 → 落地压弹 → 回稳 */
+@keyframes companion-hop {
+    0% { transform: translateY(0) scale(1, 1); }
+    30% { transform: translateY(-18px) rotate(-2deg) scale(0.98, 1.04); }
+    55% { transform: translateY(2px) scale(1.05, 0.92); }
+    75% { transform: translateY(-5px) scale(0.99, 1.02); }
+    100% { transform: translateY(0) scale(1, 1); }
+}
+.companion-stage.hop {
+    animation: companion-hop 0.72s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==================== 待机彩蛋动作（太久没人理时自娱自乐） ==================== */
+/* 打瞌睡：歪头下沉 + Zzz */
+@keyframes companion-doze {
+    0% { transform: rotate(0deg) translateY(0); }
+    35% { transform: rotate(11deg) translateY(8px); }
+    70% { transform: rotate(9deg) translateY(6px); }
+    100% { transform: rotate(0deg) translateY(0); }
+}
+.companion-stage.act-doze { animation: companion-doze 3.2s ease-in-out; }
+/* 伸懒腰：向上拉长再弹回 */
+@keyframes companion-stretch {
+    0% { transform: scale(1, 1) translateY(0); }
+    35% { transform: scale(0.94, 1.14) translateY(-6px); }
+    60% { transform: scale(0.94, 1.14) translateY(-6px); }
+    100% { transform: scale(1, 1) translateY(0); }
+}
+.companion-stage.act-stretch { animation: companion-stretch 1.7s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* 左右张望：快速甩头 */
+@keyframes companion-look {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(-8deg); }
+    45% { transform: rotate(7deg); }
+    70% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+.companion-stage.act-look { animation: companion-look 1.5s ease-in-out; }
+/* 开心转圈：原地 360° 带跳跃 */
+@keyframes companion-spin {
+    0% { transform: rotate(0deg) translateY(0); }
+    30% { transform: rotate(140deg) translateY(-14px); }
+    60% { transform: rotate(280deg) translateY(-6px); }
+    100% { transform: rotate(360deg) translateY(0); }
+}
+.companion-stage.act-spin { animation: companion-spin 1.15s cubic-bezier(0.45, 0, 0.3, 1); }
+/* 蹲下休息：压扁蹲一会儿再弹起来 */
+@keyframes companion-squat {
+    0% { transform: scale(1, 1) translateY(0); }
+    25% { transform: scale(1.1, 0.82) translateY(10px); }
+    65% { transform: scale(1.1, 0.82) translateY(10px); }
+    100% { transform: scale(1, 1) translateY(0); }
+}
+.companion-stage.act-squat { animation: companion-squat 2.2s ease-in-out; }
+
+/* 瞌睡 Zzz 粒子 */
+.companion-particle.zzz {
+    color: #a5b4fc;
+    font-weight: 800;
+    font-size: 15px;
+}
+@keyframes companion-squish {
+    0% { transform: scale(1, 1); }
+    30% { transform: scale(1.12, 0.86); }
+    55% { transform: scale(0.94, 1.08); }
+    75% { transform: scale(1.04, 0.96); }
+    100% { transform: scale(1, 1); }
+}
+@keyframes companion-particle-up {
+    0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--dx, 0px), -78px) scale(1.15) rotate(var(--rot, 12deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .companion-stage, .companion-img { animation: none; }
+}
+
+/* 手机端缩小，避免遮挡导航 */
+@media (max-width: 768px) {
+    .companion-widget { right: 10px; bottom: 80px; width: 88px; }
+    .companion-stage { width: 88px; height: 118px; border-radius: 17px; }
+    .companion-img { border-radius: 15px; }
+    .companion-name { font-size: 9px; padding: 2px 8px; }
+    .companion-bubble { font-size: 11px; max-width: 140px; }
+}

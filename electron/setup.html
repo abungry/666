@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 作者：周梓润 -->
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+    <title>首次配置 - Spatial AI Companion</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            background: #0f1226;
+            color: #e8eaf6;
+            font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+        }
+
+        /* 动态光晕背景 */
+        .bg { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(64px);
+            opacity: 0.5;
+        }
+        .blob.b1 {
+            width: 420px; height: 420px;
+            top: -140px; left: -110px;
+            background: radial-gradient(circle, #6366f1, transparent 70%);
+            animation: drift1 18s ease-in-out infinite;
+        }
+        .blob.b2 {
+            width: 380px; height: 380px;
+            bottom: -150px; right: -120px;
+            background: radial-gradient(circle, #06b6d4, transparent 70%);
+            animation: drift2 22s ease-in-out infinite;
+        }
+        .blob.b3 {
+            width: 260px; height: 260px;
+            top: 42%; left: 58%;
+            background: radial-gradient(circle, #10b981, transparent 72%);
+            opacity: 0.28;
+            animation: drift1 26s ease-in-out infinite reverse;
+        }
+        @keyframes drift1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(36px, 48px) scale(1.12); }
+        }
+        @keyframes drift2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-44px, -36px) scale(1.15); }
+        }
+
+        /* 外层骨架 */
+        .shell {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px 28px 22px;
+        }
+
+        header { flex: none; }
+
+        .logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .sub {
+            margin: 0;
+            font-size: 12.5px;
+            line-height: 1.7;
+            color: rgba(232, 234, 246, 0.62);
+        }
+
+        .sub strong { color: #67e8f9; font-weight: 700; }
+
+        /* 可滚动的表单区 */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            margin: 20px -6px 0;
+            padding: 0 6px 4px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+        }
+        main::-webkit-scrollbar { width: 6px; }
+        main::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.45);
+            border-radius: 3px;
+        }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0 10px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: rgba(232, 234, 246, 0.45);
+        }
+        .group-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.14), transparent);
+        }
+
+        .group + .group { margin-top: 20px; }
+
+        .field {
+            padding: 13px 15px 14px;
+            margin-bottom: 10px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.075);
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .field:focus-within {
+            border-color: rgba(99, 102, 241, 0.55);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f3ff;
+        }
+
+        .badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            border-radius: 999px;
+        }
+        .badge.req {
+            color: #67e8f9;
+            background: rgba(6, 182, 212, 0.16);
+            border: 1px solid rgba(6, 182, 212, 0.35);
+        }
+        .badge.opt {
+            color: rgba(232, 234, 246, 0.5);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hint {
+            margin: 0 0 9px;
+            font-size: 11.5px;
+            line-height: 1.55;
+            color: rgba(232, 234, 246, 0.5);
+        }
+
+        .hint a {
+            color: #a5b4fc;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(165, 180, 252, 0.5);
+            cursor: pointer;
+        }
+        .hint a:hover { color: #c7d2fe; border-bottom-color: #c7d2fe; }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(0, 0, 0, 0.28);
+            color: #fff;
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: 12.5px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input::placeholder {
+            color: rgba(232, 234, 246, 0.28);
+            font-family: inherit;
+        }
+        input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+        }
+        input.error {
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.16);
+            animation: shake 0.32s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 底部操作区 */
+        footer { flex: none; padding-top: 14px; }
+
+        button.save {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 8px 26px rgba(99, 102, 241, 0.4);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+        }
+        button.save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.55);
+        }
+        button.save:active { transform: scale(0.985); }
+        button.save:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+        .path {
+            margin: 10px 0 0;
+            font-size: 10.5px;
+            line-height: 1.6;
+            text-align: center;
+            color: rgba(232, 234, 246, 0.34);
+            word-break: break-all;
+        }
+
+        /* 成功遮罩 */
+        .done {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: grid;
+            place-items: center;
+            background: rgba(15, 18, 38, 0.92);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .done.show { opacity: 1; pointer-events: auto; }
+
+        .done .card {
+            text-align: center;
+            transform: translateY(12px) scale(0.94);
+            transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .done.show .card { transform: translateY(0) scale(1); }
+
+        .check {
+            width: 62px;
+            height: 62px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            display: grid;
+            place-items: center;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+        }
+        .check svg { width: 30px; height: 30px; }
+
+        .done h2 {
+            margin: 0 0 6px;
+            font-size: 17px;
+            font-weight: 800;
+        }
+        .done p {
+            margin: 0;
+            font-size: 12px;
+            color: rgba(232, 234, 246, 0.55);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+        <span class="blob b3"></span>
+    </div>
+
+    <div class="shell">
+        <header>
+            <div class="logo">◎</div>
+            <h1>首先配置一下 API Key</h1>
+            <p class="sub">AI 推荐、地图检索和天气都依赖第三方服务。密钥只保存在<strong>本机</strong>，不会上传，也不会打进安装包。</p>
+        </header>
+
+        <main id="fields"></main>
+
+        <footer>
+            <button class="save" id="save">保存并开始使用</button>
+            <p class="path" id="path"></p>
+        </footer>
+    </div>
+
+    <div class="done" id="done">
+        <div class="card">
+            <div class="check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12.5l5.5 5.5L20 6.5"/>
+                </svg>
+            </div>
+            <h2>配置已保存</h2>
+            <p>正在重新启动应用…</p>
+        </div>
+    </div>
+
+    <script>
+        const FIELDS = [
+            {
+                group: '必需',
+                key: 'DEEPSEEK_API_KEY',
+                label: 'DeepSeek API Key',
+                hint: '驱动 AI 推荐和对话。没有它，推荐会退化成静态列表。',
+                url: 'https://platform.deepseek.com/api_keys',
+                linkText: '去申请',
+                placeholder: 'sk-...',
+                required: true
+            },
+            {
+                group: '必需',
+                key: 'AMAP_WEB_KEY',
+                label: '高德 Web 服务 Key',
+                hint: 'POI 搜索、路线规划和地理编码。注意要选「Web 服务」类型。',
+                url: 'https://console.amap.com/dev/key/app',
+                linkText: '去申请',
+                placeholder: '32 位字符',
+                required: true
+            },
+            {
+                group: '推荐填写',
+                key: 'QWEATHER_KEY',
+                label: '和风天气 Key',
+                hint: '实时天气、逐时预报和生活指数。不填则天气面板不可用。',
+                url: 'https://console.qweather.com/',
+                linkText: '去申请',
+                placeholder: '可选'
+            },
+            {
+                group: '推荐填写',
+                key: 'TIANDITU_KEY',
+                label: '天地图 Key',
+                hint: '地形和官方影像图层。不填则地图只剩标准底图。',
+                url: 'https://lbs.tianditu.gov.cn/',
+                linkText: '去申请',
+                placeholder: '可选'
+            },
+            {
+                group: '推荐填写',
+                key: 'SUPABASE_URL',
+                label: 'Supabase 项目地址',
+                hint: '云端记忆库，让收藏和足迹跨设备同步。不填则只存本机。',
+                url: 'https://supabase.com/dashboard',
+                linkText: '去控制台',
+                placeholder: 'https://xxx.supabase.co'
+            },
+            {
+                group: '推荐填写',
+                key: 'SUPABASE_ANON_KEY',
+                label: 'Supabase anon Key',
+                hint: '和上一项配套填写，在 Supabase 项目的 Settings → API 里找。',
+                placeholder: 'sb_publishable_...'
+            },
+            {
+                group: '进阶可选',
+                key: 'BAIDU_MAP_AK',
+                label: '百度地图 AK',
+                hint: '用于多源检索对比，不填不影响主流程。',
+                url: 'https://lbsyun.baidu.com/apiconsole/key',
+                linkText: '去申请',
+                placeholder: '可选'
+            }
+        ];
+
+        const REQUIRED = FIELDS.filter(f => f.required).map(f => f.key);
+        const fieldsEl = document.getElementById('fields');
+        const saveBtn = document.getElementById('save');
+        const doneEl = document.getElementById('done');
+        const inputs = {};
+
+        // 浏览器里预览本页时 sacSetup 不存在，用占位实现避免报错
+        const api = window.sacSetup || {
+            load: async () => null,
+            save: async () => ({ ok: false, error: '请在桌面版应用内使用' }),
+            configPath: async () => '（浏览器预览模式，实际保存在应用数据目录）',
+            openUrl: () => {},
+            relaunch: () => {}
+        };
+
+        function render() {
+            let currentGroup = '';
+            let container = null;
+
+            for (const field of FIELDS) {
+                if (field.group !== currentGroup) {
+                    currentGroup = field.group;
+                    const section = document.createElement('section');
+                    section.className = 'group';
+                    const title = document.createElement('div');
+                    title.className = 'group-title';
+                    title.textContent = currentGroup;
+                    section.appendChild(title);
+                    fieldsEl.appendChild(section);
+                    container = section;
+                }
+
+                const wrap = document.createElement('div');
+                wrap.className = 'field';
+
+                const row = document.createElement('div');
+                row.className = 'row';
+                const label = document.createElement('label');
+                label.textContent = field.label;
+                const badge = document.createElement('span');
+                badge.className = field.required ? 'badge req' : 'badge opt';
+                badge.textContent = field.required ? '必需' : '可选';
+                row.append(label, badge);
+
+                const hint = document.createElement('p');
+                hint.className = 'hint';
+                hint.textContent = field.hint + ' ';
+                if (field.url) {
+                    const link = document.createElement('a');
+                    link.textContent = field.linkText;
+                    link.dataset.url = field.url;
+                    hint.appendChild(link);
+                }
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.spellcheck = false;
+                input.autocomplete = 'off';
+                input.placeholder = field.placeholder || '';
+                input.dataset.key = field.key;
+                input.addEventListener('input', () => input.classList.remove('error'));
+
+                inputs[field.key] = input;
+                wrap.append(row, hint, input);
+                container.appendChild(wrap);
+            }
+        }
+
+        function collect() {
+            const config = {};
+            for (const [key, input] of Object.entries(inputs)) {
+                const value = input.value.trim();
+                if (value) config[key] = value;
+            }
+            return config;
+        }
+
+        async function save() {
+            const config = collect();
+            let firstMissing = null;
+
+            for (const key of REQUIRED) {
+                const input = inputs[key];
+                if (!String(config[key] || '').trim()) {
+                    input.classList.remove('error');
+                    void input.offsetWidth;
+                    input.classList.add('error');
+                    if (!firstMissing) firstMissing = input;
+                }
+            }
+
+            if (firstMissing) {
+                firstMissing.focus();
+                firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('path').textContent = '请先填写标红的必需项，再保存';
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = '保存中…';
+
+            const result = await api.save(config);
+
+            if (result && result.ok) {
+                doneEl.classList.add('show');
+                document.getElementById('path').textContent = '配置文件：' + result.path;
+                setTimeout(() => api.relaunch(), 1400);
+            } else {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '保存并开始使用';
+                const message = result && result.error
+                    ? '保存失败：' + result.error
+                    : '还有必需项没填完，请检查上面标红的输入框。';
+                document.getElementById('path').textContent = message;
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const link = event.target.closest('a[data-url]');
+            if (link) {
+                event.preventDefault();
+                api.openUrl(link.dataset.url);
+            }
+        });
+
+        saveBtn.addEventListener('click', save);
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Enter' && !event.isComposing) {
+                const active = document.activeElement;
+                if (active && active.tagName === 'INPUT') {
+                    event.preventDefault();
+                    save();
+                }
+            }
+        });
+
+        render();
+
+        api.load().then(existing => {
+            if (!existing) return;
+            for (const [key, input] of Object.entries(inputs)) {
+                if (existing[key]) input.value = existing[key];
+            }
+        }).catch(() => {});
+
+        api.configPath().then(p => {
+            document.getElementById('path').textContent = '配置保存在：' + p;
+        }).catch(() => {});
+    </script>
+</body>
+</html>

@@ -23,9 +23,22 @@ function initSupabase() {
                         return;
                     }
                     supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-                    supabaseClient.from('profiles').select('user_id').limit(1).then(({ error }) => {
-                        if (error) reportSupabaseError('连接 profiles', error);
-                        else console.log('Supabase 已连接');
+                    // 匿名登录：JWT 里的 auth.uid() 作为 RLS 行级隔离依据，不可伪造
+                    supabaseClient.auth.getSession().then(({ data }) => {
+                        if (data && data.session) {
+                            window.__sacAuthUid = data.session.user.id;
+                            console.log('Supabase 已连接（匿名会话复用）');
+                            return;
+                        }
+                        supabaseClient.auth.signInAnonymously().then(({ data: d, error }) => {
+                            if (error) {
+                                console.warn('匿名登录失败（请在 Supabase 控制台开启 Anonymous sign-ins），云端功能降级', error);
+                                reportSupabaseError('匿名登录', error);
+                                return;
+                            }
+                            window.__sacAuthUid = d.user.id;
+                            console.log('Supabase 已连接（匿名登录）');
+                        });
                     });
                 } catch (e) { console.warn('Supabase 创建客户端失败', e); }
             })
@@ -82,17 +95,46 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
-/* -------- 获取用户信息（无登录态时注入默认访客，直接进入主页） -------- */
-function getCurrentUser() {
+/* -------- 获取用户信息（无登录态时注入随机访客 ID，直接进入主页） -------- */
+// 旧版所有访客共用 SAC_GUEST，云端同一行被反复覆盖；改为每浏览器独立随机 ID，
+// 该 ID 同时作为 RLS 行级隔离依据（随请求头 x-sac-uid 发送）
+function newGuestId() {
     try {
-        const u = JSON.parse(localStorage.getItem('sac_current_user'));
-        if (u) return u;
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        return 'u' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+        return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 14);
+    }
+}
+function getCurrentUser() {
+    let u = null;
+    try { u = JSON.parse(localStorage.getItem('sac_current_user')); } catch {}
+    if (u && typeof u.id === 'string' && u.id && u.id !== 'SAC_GUEST') return u;
+    const id = newGuestId();
+    const guest = {
+        id,
+        username: (u && u.username) || '探索者',
+        phone: (u && u.phone) || ''
+    };
+    try {
+        localStorage.setItem('sac_current_user', JSON.stringify(guest));
+        // 迁移旧访客的入职完成标记，避免老用户被踢回引导页
+        const done = JSON.parse(localStorage.getItem('sac_onboarding_done') || '{}');
+        if (done['SAC_GUEST']) {
+            done[id] = true;
+            delete done['SAC_GUEST'];
+            localStorage.setItem('sac_onboarding_done', JSON.stringify(done));
+        }
     } catch {}
-    const guest = { id: 'SAC_GUEST', username: '探索者', phone: '' };
-    localStorage.setItem('sac_current_user', JSON.stringify(guest));
     return guest;
 }
 const currentUser = getCurrentUser();
+
+// 云端行级隔离用：匿名登录后的 auth.uid()；未登录成功时回退本地访客 ID（RLS 会拒绝，自动降级 localStorage）
+function cloudUid() {
+    return window.__sacAuthUid || currentUser?.id || 'SAC_GUEST';
+}
 
 // 免登录模式：未完成引导则先去引导页（防止直接访问 main.html 绕过引导）
 (function () {
@@ -262,7 +304,7 @@ function saveProfileEdit() {
     // 同步到 Supabase（失败不阻塞）
     if (supabaseClient) {
         supabaseClient.from('profiles').upsert({
-            user_id: currentUser?.id || 'SAC_GUEST',
+            user_id: cloudUid(),
             username: name,
             avatar: pickedAvatar || profile.avatar || 'fa-user-astronaut',
             age: profile.age || null,
@@ -294,7 +336,7 @@ async function openFavorites() {
             const { data, error } = await supabaseClient
                 .from('favorites')
                 .select('place_name')
-                .eq('user_id', currentUser?.id || 'SAC_GUEST');
+                .eq('user_id', cloudUid());
             if (!error && data && data.length > 0) {
                 favs = data.map(r => r.place_name);
                 localStorage.setItem('sac_favorites', JSON.stringify(favs));
@@ -344,7 +386,7 @@ function removeFav(name) {
     if (supabaseClient) {
         supabaseClient.from('favorites')
             .delete()
-            .eq('user_id', currentUser?.id || 'SAC_GUEST')
+            .eq('user_id', cloudUid())
             .eq('place_name', name)
             .then(({ error }) => reportSupabaseError('取消收藏', error));
     }
@@ -414,7 +456,7 @@ function savePreferences() {
     // 同步到 Supabase
     if (supabaseClient) {
         supabaseClient.from('profiles').upsert({
-            user_id: currentUser?.id || 'SAC_GUEST',
+            user_id: cloudUid(),
             activity_tags: profile.tags,
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' }).then(({ error }) => reportSupabaseError('保存偏好', error));
@@ -578,6 +620,11 @@ async function requestAIRecommendation(text, mode) {
         })();
         let favorites = [];
         try { favorites = JSON.parse(localStorage.getItem('sac_favorites') || '[]'); } catch {}
+        const companionInfo = typeof getCurrentCompanion === 'function'
+            ? getCurrentCompanion()
+            : { name: '星旅', tag: '猫耳向导' };
+        // 看板娘进入思考状态
+        if (typeof companionSay === 'function') companionSay('让我想想…', 15000);
         const response = await fetch('/api/recommend', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -586,6 +633,7 @@ async function requestAIRecommendation(text, mode) {
                 query: text,
                 memory: memory.slice(0, 30),
                 localCandidates,
+                companion: { name: companionInfo.name, tag: companionInfo.tag },
                 location: {
                     lat: Number(userProfile.lat) || 39.9597,
                     lng: Number(userProfile.lng) || 116.2980,
@@ -624,6 +672,13 @@ async function requestAIRecommendation(text, mode) {
             avoid: places[0]?.name ? [places[0].name] : []
         };
         appendMessage('ai', replyText, reasonCard.length ? reasonCard : null, places, feedback);
+        // 看板娘情绪联动：DeepSeek 返回的 mood + 陪伴台词
+        if (typeof companionSetMood === 'function' && data.mood) {
+            const moodMap = { excited: 'happy', thinking: 'normal' };
+            companionSetMood(moodMap[data.mood] || data.mood, 2800);
+            if (data.mood === 'happy' || data.mood === 'excited') companionParticles('star', 5);
+        }
+        if (typeof companionSay === 'function' && data.companionLine) companionSay(data.companionLine, 4600);
         chatHistory.push({ role: 'user', content: mode === 'direct' ? '根据记忆直接推荐' : text });
         chatHistory.push({ role: 'assistant', content: replyText });
         saveChatHistory();
@@ -634,6 +689,9 @@ async function requestAIRecommendation(text, mode) {
         const reply = generateAIReply(text, { skipMemory: true });
         const finalReply = mode === 'direct' ? generateAIReply(`请推荐 ${fallbackText}`, { skipMemory: true }) : reply;
         finalReply.text = `${finalReply.text}\n\n（DeepSeek 暂时不可用，已切换为本地空间推荐）`;
+        // 看板娘：AI 挂了表示歉意
+        if (typeof companionSetMood === 'function') companionSetMood('shy', 2600);
+        if (typeof companionSay === 'function') companionSay('DeepSeek 睡着了，我先用小本本帮你找～', 4200);
         appendMessage('ai', finalReply.text, finalReply.reasonCard, finalReply.places);
         if (text) recordSearchKeywords(text, [], { priority: 1 });
         chatHistory.push({ role: 'user', content: mode === 'direct' ? '根据记忆直接推荐' : text });
@@ -878,7 +936,7 @@ function saveUserMemory(memory) {
     refreshMemoryBadge();
     // 同步到 Supabase search_memories（全量替换：先删后插，简单可靠）
     if (supabaseClient && memory.keywords && memory.keywords.length > 0) {
-        const uid = currentUser?.id || 'SAC_GUEST';
+        const uid = cloudUid();
         const rows = memory.keywords.slice(0, 30).map(k => ({
             user_id: uid,
             keyword: String(k.keyword || '').slice(0, 50),
@@ -961,6 +1019,11 @@ function applyRecommendationFeedback(preference, keywords, button) {
         button.classList.add('selected');
     }
     showToast(preference === 'avoid' ? '已记住：以后避开这类选择' : '已记住：以后优先推荐这类地点', 'success');
+    // 看板娘反馈联动
+    if (typeof companionReact === 'function') {
+        if (preference === 'avoid') companionReact('shy', '呜，下次我会挑得更准的！');
+        else companionReact('happy', '谢谢夸奖，我会继续努力的！');
+    }
 }
 
 function getPrioritizedMemoryKeywords() {
@@ -1426,6 +1489,8 @@ async function planRouteWithAmap(dstLat, dstLng, dstName) {
 function planRouteTo(dstLat, dstLng, dstName) {
     if (!mainMap) return;
     mainMap.closePopup();
+    reinforceMemoryForPlace(dstName, 3); // 行为加权：导航 +3
+    if (typeof companionReact === 'function') companionReact('happy', '路线规划好啦，出发！');
 
     // 清除之前的路线
     clearRoute();
@@ -1851,6 +1916,29 @@ function haversineKm(lat1, lng1, lat2, lng2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// 用记忆库 / 收藏 / 画像给地点打个性化分数，返回命中详情用于生成推荐理由
+function scorePlaceByMemory(p) {
+    const memory = getUserMemory().keywords || [];
+    const haystack = [p.name, p.type, p.desc, ...(p.aliases || []), ...(p.tags || [])].join(' ');
+    let score = 0;
+    const matched = [];
+    let avoided = false;
+    for (const m of memory) {
+        if (!m.keyword || m.keyword.length < 2 || !haystack.includes(m.keyword)) continue;
+        const strength = Number(m.priority || 1) * 9 + Math.min(8, Number(m.count) || 1);
+        if (m.preference === 'avoid') { score -= strength * 2; avoided = true; }
+        else { score += strength; matched.push(m.keyword); }
+    }
+    const favHit = getFavs().includes(p.name);
+    if (favHit) score += 20;
+    const profileTags = [...(Array.isArray(userProfile.tags) ? userProfile.tags : []), ...(Array.isArray(userProfile.activities) ? userProfile.activities : [])];
+    const profileMatched = [];
+    for (const tag of profileTags) {
+        if (tag && String(tag).length >= 2 && haystack.includes(tag)) { score += 7; profileMatched.push(tag); }
+    }
+    return { score, matched: [...new Set(matched)], avoided, favHit, profileMatched: [...new Set(profileMatched)] };
+}
+
 function generateRecommendations(filter = 'all') {
     let pool = [...BEIJING_PLACES];
     const relaxTags = ['休闲', '安静', '散步', '放松', '发呆'];
@@ -1859,11 +1947,17 @@ function generateRecommendations(filter = 'all') {
     } else if (filter !== 'all') {
         pool = pool.filter(p => TYPE_TO_CATEGORY[p.type] === filter);
     }
-    // 随机打乱取 6 个
-    pool.sort(() => Math.random() - 0.5);
-    const selected = pool.slice(0, 6);
+    // 个性化打分：踩中“避开”记忆的地点直接出局（除非剩余不足 6 个）
+    let scoredPool = pool.map(p => ({ p, pers: scorePlaceByMemory(p) }));
+    const positive = scoredPool.filter(item => !(item.pers.avoided && item.pers.score < 0));
+    if (positive.length >= 6) scoredPool = positive;
+    // 按个性化分数排序，加少量扰动避免每次完全一样
+    scoredPool = scoredPool
+        .map(item => ({ ...item, rank: item.pers.score + Math.random() * 10 }))
+        .sort((a, b) => b.rank - a.rank);
+    const selected = scoredPool.slice(0, 6);
     const favs = getFavs();
-    return selected.map(p => {
+    return selected.map(({ p, pers }) => {
         const cat = TYPE_TO_CATEGORY[p.type] || 'nature';
         const features = p.features || {};
         const meta = [];
@@ -1873,7 +1967,14 @@ function generateRecommendations(filter = 'all') {
         else if (features.slope >= 3) meta.push({t:`缓坡 ${features.slope}°`,c:'blue'});
         if (features.quietness >= 80) meta.push({t:`安静度 ${features.quietness}%`,c:'green'});
         const desc = p.desc || '';
-        const reason = `${desc.slice(0, 30)}${desc.length > 30 ? '...' : ''}`;
+        // 匹配度来自个性化分数；推荐理由优先引用命中的记忆/收藏/画像
+        const match = Math.max(62, Math.min(98, Math.round(70 + pers.score)));
+        let reason;
+        if (pers.matched.length) reason = `因为你喜欢「${pers.matched.slice(0, 3).join('、')}」，这里很契合`;
+        else if (pers.favHit) reason = '你收藏过这里，值得再去一次';
+        else if (pers.profileMatched.length) reason = `符合你「${pers.profileMatched[0]}」的活动偏好`;
+        else reason = `${desc.slice(0, 30)}${desc.length > 30 ? '...' : ''}`;
+        if (pers.favHit && pers.matched.length) reason += '；你也收藏过这里';
         const imgs = buildPlaceImage(p);
         return {
             name: p.name,
@@ -1882,7 +1983,7 @@ function generateRecommendations(filter = 'all') {
             gradient: TYPE_TO_GRADIENT[p.type] || 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             osmImage: imgs.osmUrl,
             fallbackImage: imgs.fallbackUrl,
-            match: Math.floor(Math.random() * 25) + 72,
+            match,
             desc: desc.slice(0, 50),
             meta: meta.length > 0 ? meta : [{t:(p.tags && p.tags[0]) || '推荐',c:'green'}],
             reason,
@@ -1921,7 +2022,15 @@ function renderRecommendList(filter = 'all') {
                 <div class="card-sub"><i class="fas fa-location-dot"></i> ${r.distance}</div>
                 <div class="card-desc">${r.desc}</div>
                 <div class="card-meta">${metaHtml}</div>
-                <button class="card-go-btn" onclick="event.stopPropagation();navigateToPlace('${r.name}',${r.lat},${r.lng})"><i class="fas fa-location-arrow"></i> 去这里</button>
+                <div class="card-reason">
+                    <div class="card-reason-title"><i class="fas fa-lightbulb"></i> 为什么推荐</div>
+                    <div class="card-reason-text">${r.reason}</div>
+                </div>
+                <div class="card-fb-row">
+                    <button class="card-fb-btn" onclick="event.stopPropagation();feedbackPlaceCard('${r.name}','like',this)" title="推荐得准，多推这类"><i class="fas fa-thumbs-up"></i></button>
+                    <button class="card-fb-btn" onclick="event.stopPropagation();feedbackPlaceCard('${r.name}','avoid',this)" title="不感兴趣，少推这类"><i class="fas fa-thumbs-down"></i></button>
+                    <button class="card-go-btn" onclick="event.stopPropagation();navigateToPlace('${r.name}',${r.lat},${r.lng})"><i class="fas fa-location-arrow"></i> 去这里</button>
+                </div>
             </div>`;
         card.addEventListener('click', () => navigateToPlace(r.name, r.lat, r.lng));
         list.appendChild(card);
@@ -1940,6 +2049,7 @@ function focusPlaceOnMap(name, lat, lng) {
 }
 
 function navigateToPlace(name, lat, lng) {
+    reinforceMemoryForPlace(name, 1); // 行为加权：查看 +1
     focusPlaceOnMap(name, lat, lng);
 }
 
@@ -1955,6 +2065,74 @@ function filterRecommend(cat, btn) {
     renderRecommendList(cat);
 }
 
+/* -------- 个性化反馈与行为加权 -------- */
+// 👍/👎 反馈：把地点的类型/标签写入记忆库（like 提优先级，avoid 标记避开）
+function feedbackPlaceCard(name, preference, btn) {
+    const place = BEIJING_PLACES.find(p => p.name === name);
+    const keywords = place
+        ? [...new Set([place.type, ...(place.tags || [])])].filter(k => k && k.length >= 2 && k.length <= 16).slice(0, 3)
+        : [name];
+    const memory = getUserMemory();
+    const now = Date.now();
+    keywords.forEach(kw => {
+        const existing = memory.keywords.find(item => item.keyword === kw);
+        if (existing) {
+            existing.preference = preference;
+            existing.count = Math.min(999, (existing.count || 1) + 1);
+            existing.lastUsed = now;
+            existing.priority = Math.min(3, (existing.priority || 1) + 1);
+        } else {
+            memory.keywords.push({
+                id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
+                keyword: kw,
+                priority: preference === 'avoid' ? 3 : 2,
+                count: 1,
+                lastUsed: now,
+                preference
+            });
+        }
+    });
+    saveUserMemory(memory);
+    const card = btn?.closest('.recommend-card');
+    if (card) {
+        card.querySelectorAll('.card-fb-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        card.classList.toggle('card-downvoted', preference === 'avoid');
+    }
+    showToast(preference === 'avoid' ? `已记住：以后少推荐「${name}」这类地点` : `已记住：多推荐「${name}」这类地点`, 'success');
+}
+
+// 行为自动加权：查看 +1、收藏 +2、导航 +3。命中已有记忆则加权重；收藏/导航无命中时把地点首个标签作为弱偏好写入
+function reinforceMemoryForPlace(name, weight) {
+    const place = BEIJING_PLACES.find(p => p.name === name);
+    const haystack = place ? [place.name, place.type, ...(place.aliases || []), ...(place.tags || [])].join(' ') : name;
+    const memory = getUserMemory();
+    let touched = false;
+    memory.keywords.forEach(item => {
+        if (item.preference === 'avoid') return;
+        if (item.keyword && item.keyword.length >= 2 && haystack.includes(item.keyword)) {
+            item.count = Math.min(999, (item.count || 1) + weight);
+            item.lastUsed = Date.now();
+            touched = true;
+        }
+    });
+    if (!touched && weight >= 2 && place) {
+        const kw = (place.tags || []).find(t => t && t.length >= 2 && t.length <= 16) || place.type;
+        if (kw && kw.length >= 2 && !memory.keywords.some(item => item.keyword === kw)) {
+            memory.keywords.push({
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                keyword: kw,
+                priority: 1,
+                count: weight,
+                lastUsed: Date.now(),
+                preference: 'like'
+            });
+            touched = true;
+        }
+    }
+    if (touched) saveUserMemory(memory);
+}
+
 function toggleFav(btn) {
     const name = btn.dataset.name;
     let favs = getFavs();
@@ -1968,7 +2146,7 @@ function toggleFav(btn) {
         if (supabaseClient) {
             supabaseClient.from('favorites')
                 .delete()
-                .eq('user_id', currentUser?.id || 'SAC_GUEST')
+                .eq('user_id', cloudUid())
                 .eq('place_name', name)
                 .then(({ error }) => reportSupabaseError('取消收藏', error));
         }
@@ -1977,12 +2155,14 @@ function toggleFav(btn) {
         btn.classList.add('active');
         btn.innerHTML = '<i class="fas fa-heart"></i>';
         showToast(`已收藏 ${name} ❤️`, 'success');
+        reinforceMemoryForPlace(name, 2); // 行为加权：收藏 +2
+        if (typeof companionReact === 'function') companionReact('happy', `「${name}」已收藏，我也想去！`);
         // Supabase 插入
         if (supabaseClient) {
             const kb = (typeof BEIJING_PLACES !== 'undefined') ? BEIJING_PLACES : [];
             const p = kb.find(x => x.name === name);
             supabaseClient.from('favorites').upsert({
-                user_id: currentUser?.id || 'SAC_GUEST',
+                user_id: cloudUid(),
                 place_name: name,
                 place_lat: p?.lat || null,
                 place_lng: p?.lng || null,
@@ -2115,7 +2295,7 @@ function savePlacesToFavorites(placeNames) {
     try { favs = JSON.parse(localStorage.getItem('sac_favorites') || '[]'); } catch { favs = []; }
     let added = 0;
     placeNames.forEach(name => {
-        if (!favs.includes(name)) { favs.push(name); added++; }
+        if (!favs.includes(name)) { favs.push(name); added++; reinforceMemoryForPlace(name, 2); } // 行为加权：收藏 +2
     });
     localStorage.setItem('sac_favorites', JSON.stringify(favs));
     if (added > 0) showToast(`已收藏 ${added} 个地点 ❤️`, 'success');
@@ -2126,7 +2306,7 @@ function savePlacesToFavorites(placeNames) {
         const rows = placeNames.map(name => {
             const p = kb.find(x => x.name === name);
             return {
-                user_id: currentUser?.id || 'SAC_GUEST',
+                user_id: cloudUid(),
                 place_name: name,
                 place_lat: p?.lat || null,
                 place_lng: p?.lng || null,

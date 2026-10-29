@@ -484,6 +484,35 @@
 }
 .card-go-btn:active { transform: scale(0.95); }
 
+/* 推荐卡片：个性化理由 + 👍/👎 反馈 */
+.card-reason { margin-bottom: 12px; }
+.card-fb-row { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+.card-fb-btn {
+    width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(148, 197, 220, 0.2);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted, #94a3b8);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s var(--spring, ease);
+}
+.card-fb-btn:hover { transform: translateY(-1px); }
+.card-fb-btn:active { transform: scale(0.9); }
+.card-fb-btn.selected:has(.fa-thumbs-up) {
+    background: rgba(52, 211, 153, 0.16);
+    border-color: rgba(52, 211, 153, 0.45);
+    color: #34d399;
+}
+.card-fb-btn.selected:has(.fa-thumbs-down) {
+    background: rgba(248, 113, 113, 0.14);
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #f87171;
+}
+.card-fb-row .card-go-btn { margin-left: auto; }
+.card-downvoted { opacity: 0.55; filter: saturate(0.6); }
+
 /* ==================== Map ==================== */
 .map-search-float {
     top: 16px;

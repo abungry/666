@@ -5,12 +5,30 @@
 # 日志与本地调试
 *.log
 debug.log
+logs/
 
 # 系统文件
 Thumbs.db
 .DS_Store
 
 # Node 后端依赖与密钥（同学的 DeepSeek 服务）
-# .env  # 临时允许推送，含真实 API Key
+# 含真实 API Key，绝不能提交；需要时从 .env.example 复制后自行填写
+.env
+.env.local
+.env.*.local
 node_modules/
 npm-debug.log*
+
+# Electron 打包产物
+dist/
+SpatialAICompanion_Setup_*.exe
+
+# 大型安装包与本地工具（不入库）
+tools/
+*.apk
+CursorSetup.exe
+
+# Python 缓存
+__pycache__/
+*.pyc
+

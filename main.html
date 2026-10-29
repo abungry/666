@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <link rel="stylesheet" href="refresh.css">
+    <link rel="stylesheet" href="companion.css">
 </head>
 <body>
     <!-- 动态背景 -->
@@ -408,13 +409,34 @@
         </div>
     </div>
 
+    <!-- 看板娘（多角色可选） -->
+    <div class="companion-widget" id="companion-widget">
+        <div class="companion-bubble" id="companion-bubble"></div>
+        <div class="companion-chat" id="companion-chat">
+            <input class="companion-chat-input" id="companion-chat-input" placeholder="直接问我…" maxlength="120" autocomplete="off">
+            <button class="companion-chat-send" id="companion-chat-send" title="发送"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="companion-picker" id="companion-picker"></div>
+        <div class="companion-stage" id="companion-stage" title="戳戳我">
+            <button class="companion-chat-btn" id="companion-chat-btn" title="和我说话"><i class="fas fa-comment-dots"></i></button>
+            <button class="companion-switch" id="companion-switch" title="换个伙伴"><i class="fas fa-repeat"></i></button>
+            <img class="companion-img" id="companion-img" src="assets/companion/companion_normal.jpg" alt="看板娘">
+            <div class="companion-name" id="companion-name"><i class="fas fa-location-crosshairs"></i> 星旅</div>
+        </div>
+    </div>
+
     <script src="beijing_places.js"></script>
     <script src="beijing_places_extended.js"></script>
     <link rel="stylesheet" href="energy.css">
     <link rel="stylesheet" href="energy-refresh.css">
     <link rel="stylesheet" href="look.css">
     <script src="energy.js"></script>
-    <script src="main.js?v=20261025"></script>
+    <script src="main.js?v=20261026c"></script>
+    <!-- Live2D 运行时（pixi.js + Cubism Core + pixi-live2d-display），仅看板娘选择 Live2D 角色时才会实际加载模型 -->
+    <script src="assets/live2d/lib/pixi.min.js"></script>
+    <script src="assets/live2d/lib/live2dcubismcore.min.js"></script>
+    <script src="assets/live2d/lib/pixi-live2d-cubism4.min.js"></script>
+    <script src="companion.js"></script>
     <script>
         // 注册 Service Worker（PWA 可安装）
         if ('serviceWorker' in navigator) {
